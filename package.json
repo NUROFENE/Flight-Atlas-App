@@ -1,0 +1,22 @@
+{
+  "name": "flight-atlas",
+  "productName": "Flight Atlas",
+  "version": "6.0.0",
+  "description": "Flight Atlas flight planning and simulator companion",
+  "main": "main.js",
+  "author": "Flight Atlas",
+  "license": "UNLICENSED",
+  "scripts": {"start":"electron .", "pack":"electron-builder --win nsis --x64", "dist":"electron-builder --win nsis --x64 --publish always"},
+  "dependencies":{"electron-updater":"^6.6.2"},
+  "devDependencies":{"electron":"^37.3.1","electron-builder":"^26.0.12"},
+  "build": {
+    "appId":"com.flightatlas.desktop",
+    "productName":"Flight Atlas",
+    "asar":true,
+    "files":["main.js","preload.js","app/**/*","package.json"],
+    "directories":{"output":"dist"},
+    "win":{"icon":"app/FlightAtlas.ico","target":[{"target":"nsis","arch":["x64"]}]} ,
+    "nsis":{"oneClick":false,"allowToChangeInstallationDirectory":true,"createDesktopShortcut":true,"createStartMenuShortcut":true},
+    "publish":{"provider":"github","owner":"NUROFENE","repo":"Flight-Atlas","releaseType":"release"}
+  }
+}
