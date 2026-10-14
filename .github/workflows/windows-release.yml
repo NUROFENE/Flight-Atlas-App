@@ -5,6 +5,9 @@ on:
     branches: [main]
 permissions:
   contents: write
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -12,8 +15,6 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -21,64 +22,47 @@ jobs:
         shell: pwsh
         run: |
           $p = Get-Content package.json -Raw | ConvertFrom-Json
-          $parts = '${{ github.repository }}'.Split('/')
+          $parts = "${{ github.repository }}".Split('/')
           $p.build.publish.owner = $parts[0]
           $p.build.publish.repo = $parts[1]
           $p | ConvertTo-Json -Depth 20 | Set-Content package.json -Encoding utf8
       - run: npm install
-      - name: Prepare version tag
-        id: release
-        if: github.event_name == 'push'
-        shell: pwsh
-        run: |
-          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          $tag = "v$version"
-          git ls-remote --exit-code --tags origin "refs/tags/$tag" | Out-Null
-          if ($LASTEXITCODE -ne 0) {
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag $tag
-            git push origin "refs/tags/$tag"
-            if ($LASTEXITCODE -ne 0) { throw "Failed to push tag $tag" }
-          }
-          $releaseExists = $false
-          $releaseList = gh release list --repo "${{ github.repository }}" --json tagName --limit 100 | ConvertFrom-Json
-          $releaseExists = @($releaseList | Where-Object { $_.tagName -eq $tag }).Count -gt 0
-          if ($releaseExists) {
-            "publish=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-            Write-Host "Release $tag exists; generating artifact only."
-          } else {
-            "publish=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-            Write-Host "Release $tag missing; publish installer."
-          }
-      - name: Publish versioned update
-        if: steps.release.outputs.publish == 'true'
-        run: npm run dist
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload updater metadata
-        if: steps.release.outputs.publish == 'true'
-        shell: pwsh
-        run: |
-          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          $tag = "v$version"
-          if (!(Test-Path "dist/latest.yml")) { throw "Missing dist/latest.yml — auto-update would not work" }
-          $files = @("dist/latest.yml") + @(Get-ChildItem "dist" -Filter "*.blockmap" | ForEach-Object { $_.FullName })
-          gh release upload $tag $files --repo "${{ github.repository }}" --clobber
-          if ($LASTEXITCODE -ne 0) { throw "Failed to upload updater metadata" }
-      - name: Build Windows installer
-        if: steps.release.outputs.publish != 'true'
+      - name: Build installer without automatic publishing
         run: npm run pack -- --publish never
-      - name: Ensure installer is attached to release
-        if: github.event_name == 'push'
+      - name: Publish release assets
         shell: pwsh
         run: |
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
           $tag = "v$version"
           $exe = @(Get-ChildItem "dist" -Filter "*.exe")
-          if ($exe.Count -eq 0) { throw "Installer .exe not found in dist" }
-          gh release upload $tag $exe.FullName --repo "${{ github.repository }}" --clobber
-          if ($LASTEXITCODE -ne 0) { throw "Failed to upload installer" }
+          if ($exe.Count -ne 1) { throw "Expected 1 installer EXE, found $($exe.Count)" }
+          $installer = $exe[0]
+          $sum = [System.Security.Cryptography.SHA512]::HashData([System.IO.File]::ReadAllBytes($installer.FullName))
+          $sha = [Convert]::ToBase64String($sum)
+          $name = $installer.Name
+          $size = $installer.Length
+          $date = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
+          $latest = @"
+          version: $version
+          files:
+            - url: $name
+              sha512: $sha
+              size: $size
+          path: $name
+          sha512: $sha
+          releaseDate: '$date'
+          "@
+          $latest | Set-Content "dist/latest.yml" -Encoding utf8
+          gh release view $tag --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --repo "${{ github.repository }}" --target "${{ github.sha }}" --title $version --notes "Flight Atlas $version"
+            if ($LASTEXITCODE -ne 0) { throw "Could not create release $tag" }
+          }
+          $files = @($installer.FullName, "dist/latest.yml")
+          $blocks = @(Get-ChildItem "dist" -Filter "*.blockmap" | ForEach-Object { $_.FullName })
+          $files += $blocks
+          gh release upload $tag $files --repo "${{ github.repository }}" --clobber
+          if ($LASTEXITCODE -ne 0) { throw "Could not upload release assets" }
       - uses: actions/upload-artifact@v4
         with:
           name: Flight-Atlas-Windows-Installer
