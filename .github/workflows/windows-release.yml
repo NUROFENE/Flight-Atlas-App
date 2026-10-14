@@ -69,6 +69,16 @@ jobs:
       - name: Build Windows installer
         if: steps.release.outputs.publish != 'true'
         run: npm run pack -- --publish never
+      - name: Ensure installer is attached to release
+        if: github.event_name == 'push'
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = "v$version"
+          $exe = @(Get-ChildItem "dist" -Filter "*.exe")
+          if ($exe.Count -eq 0) { throw "Installer .exe not found in dist" }
+          gh release upload $tag $exe.FullName --repo "${{ github.repository }}" --clobber
+          if ($LASTEXITCODE -ne 0) { throw "Failed to upload installer" }
       - uses: actions/upload-artifact@v4
         with:
           name: Flight-Atlas-Windows-Installer
