@@ -54,6 +54,16 @@ jobs:
         run: npm run dist
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload updater metadata
+        if: steps.release.outputs.publish == 'true'
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = "v$version"
+          if (!(Test-Path "dist/latest.yml")) { throw "Missing dist/latest.yml — auto-update would not work" }
+          $files = @("dist/latest.yml") + @(Get-ChildItem "dist" -Filter "*.blockmap" | ForEach-Object { $_.FullName })
+          gh release upload $tag $files --repo "${{ github.repository }}" --clobber
+          if ($LASTEXITCODE -ne 0) { throw "Failed to upload updater metadata" }
       - name: Build Windows installer
         if: steps.release.outputs.publish != 'true'
         run: npm run pack -- --publish never
