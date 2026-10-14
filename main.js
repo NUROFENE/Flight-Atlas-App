@@ -17,7 +17,7 @@ function json(body,status=200){return new Response(JSON.stringify(body),{status,
 function failure(message,status=502){return new Response(message,{status,headers:{'content-type':'text/plain; charset=utf-8'}})}
 async function getRemote(url,accept='*/*',seconds=40){
  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),seconds*1000);
- try{const response=await net.fetch(url,{headers:{'user-agent':'Mozilla/5.0 FlightAtlas/6.0 (Windows; Flight Simulator)','accept':accept,'referer':'https://portalpasha.ru/charts/'},signal:ctrl.signal});if(!response.ok)throw Error('HTTP '+response.status);return response}
+ try{let response;try{response=await net.fetch(url,{headers:{'user-agent':'Mozilla/5.0 FlightAtlas/6.0 (Windows; Flight Simulator)','accept':accept,'referer':'https://portalpasha.ru/charts/'},signal:ctrl.signal})}catch(err){if(!/ERR_BLOCKED_BY_CLIENT|ERR_FAILED|ERR_CONNECTION/i.test(String(err)))throw err;response=await fetch(url,{headers:{'User-Agent':'Mozilla/5.0 FlightAtlas/6.0 (Windows; Flight Simulator)','Accept':accept},signal:ctrl.signal})}if(!response.ok)throw Error('HTTP '+response.status);return response}
  finally{clearTimeout(timer)}
 }
 function dataDir(){return path.join(app.getPath('userData'),'charts')}
