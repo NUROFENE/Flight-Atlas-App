@@ -53,8 +53,9 @@ jobs:
           releaseDate: '$date'
           "@
           $latest | Set-Content "dist/latest.yml" -Encoding utf8
-          gh release view $tag --repo "${{ github.repository }}" *> $null
-          if ($LASTEXITCODE -ne 0) {
+          $releaseList = gh release list --repo "${{ github.repository }}" --json tagName --limit 100 | ConvertFrom-Json
+          $exists = @($releaseList | Where-Object { $_.tagName -eq $tag }).Count -gt 0
+          if (-not $exists) {
             gh release create $tag --repo "${{ github.repository }}" --target "${{ github.sha }}" --title $version --notes "Flight Atlas $version"
             if ($LASTEXITCODE -ne 0) { throw "Could not create release $tag" }
           }
