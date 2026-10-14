@@ -196,6 +196,24 @@ body.theme-black .mod-dialog{background:#17191d;border-color:#444b56}
 .scene-card .scene-download{margin:0;padding:9px 13px;border:1px solid #dae3ef;background:#f5f7fb;color:#172033;border-radius:8px;font-size:12px;white-space:nowrap}
 .scene-card .scene-download:hover{background:#d8e9ff;color:#111d30}
 @media(max-width:560px){.scene-card{grid-template-columns:1fr}.scene-art{height:155px}.scene-body{padding:0 2px 4px}.scene-dialog{width:96vw}}
+
+/* Charts: fixed workspace, only plate list scrolls; preview consumes available width. */
+#chartsView{height:calc(100vh - 28px);overflow:hidden!important;min-height:0}
+#chartsView .charts-shell{max-width:none;width:100%;height:100%;box-sizing:border-box;padding:10px 14px 8px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#chartsView .charts-header{flex:none;margin:3px 0 12px}
+#chartsView .charts-heading{font-size:30px;margin:3px 0}
+#chartsView .charts-workspace{flex:1;min-height:0;display:grid;grid-template-columns:310px minmax(0,1fr);align-items:stretch;gap:12px}
+#chartsView .charts-sidebar{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden}
+#chartsView .charts-sidehead{flex:none;padding:14px}
+#chartsView .charts-plates{flex:1;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+#chartsView .charts-mainpanel{display:flex;flex-direction:column;height:100%;min-height:0;min-width:0;overflow:hidden}
+#chartsView .charts-mainhead{flex:none;padding:10px 14px}
+#chartsView .charts-mainbody{flex:1;min-height:0;min-width:0;padding:0;overflow:hidden}
+#chartsView .chart-inline-view{flex:1;min-height:0;width:100%;height:100%}
+#chartsView .chart-inline-toolbar{flex:none}
+#chartsView .chart-inline-canvaswrap{flex:1;height:auto;min-height:0;width:100%;overflow:auto;align-items:center;justify-content:center;padding:12px;box-sizing:border-box}
+#chartsView .charts-notice{flex:none;font-size:10px;margin:5px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:900px){#chartsView .charts-workspace{grid-template-columns:235px minmax(0,1fr)}#chartsView .charts-sidehead{padding:9px}#chartsView .chart-inline-canvaswrap{min-height:0;height:auto}}
 </style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><style>
 #saveProfile.saved-ok,#saveProfile.saved-ok:hover{background:#168350!important;border-color:#35cc89!important;color:#fff!important;box-shadow:0 0 0 1px #2eba7a55}
 #activeView .wx-cards.wx-few{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start}
@@ -872,8 +890,9 @@ async function loadChartIndex(icao){if(chartIndexCache[icao]){chartLoadError='';
  chartIndexCache[icao]=plates;chartLoadError='';
  }catch(e){chartLoadError='Не удалось скачать PDF через локальный сервер. Проверьте доступность исходного файла по кнопке ниже, затем нажмите «Повторить». Подробности: '+(e?.message||String(e));}finally{chartLoading=false;if(chartAirport===icao)renderCharts()}}
 function chartMatches(){let q=chartQuery.trim().toUpperCase();return CHART_PACKS.filter(a=>!q||a.icao.includes(q)||(a.iata||'').includes(q)||(a.name||'').toUpperCase().includes(q))}
-function renderCharts(){const host=$('chartsView'),airport=CHART_PACKS.find(a=>a.icao===chartAirport)||CHART_PACKS[0],all=chartIndexCache[airport.icao]||[],plates=all.filter(p=>(chartType==='all'||p.category===chartType)&&(!chartSearch||[p.title,p.code].join(' ').toUpperCase().includes(chartSearch.toUpperCase()))),matches=chartMatches();
+function renderCharts(){const scrollBefore=$('chartsView')?.querySelector('.charts-plates')?.scrollTop||0;const host=$('chartsView'),airport=CHART_PACKS.find(a=>a.icao===chartAirport)||CHART_PACKS[0],all=chartIndexCache[airport.icao]||[],plates=all.filter(p=>(chartType==='all'||p.category===chartType)&&(!chartSearch||[p.title,p.code].join(' ').toUpperCase().includes(chartSearch.toUpperCase()))),matches=chartMatches();
  host.innerHTML=`<div class="charts-shell"><div class="charts-header"><div><div class="eyebrow">FLIGHT ATLAS / NAVIGATION CHARTS</div><h1 class="charts-heading">Charts</h1></div><span class="charts-tag">${CHART_PACKS.length} AIRPORTS</span></div><div class="charts-workspace"><section class="charts-sidebar"><div class="charts-sidehead"><strong>${airport.icao} / ${airport.iata}</strong><p class="charts-muted" style="font-size:12px;margin:5px 0">${esc(airport.name)}</p><small class="charts-muted">${esc(chartCatalogMessage||"Загрузка каталога…")}</small><input id="chartsSearch" class="charts-find" placeholder="Поиск ICAO / IATA" value="${esc(chartQuery)}" autocomplete="off"><div class="charts-cat-pills">${CHART_TYPES.map(t=>`<button class="charts-cat-pill ${chartType===t.id?'selected':''}" data-chart-type="${t.id}">${t.name}</button>`).join('')}</div><input id="chartPlateSearch" class="charts-find" style="font-size:12px!important;padding:10px!important" placeholder="Название схемы (например BEPOL)" value="${esc(chartSearch)}"></div><div class="charts-plates">${chartLoading?`<div class="chart-progress"><span style="width:${chartIndexProgress}%"></span></div><div class="charts-plate-status">Читаю страницы PDF… ${chartIndexProgress}%</div>`:chartLoadError?`<div class="charts-plate-status">${esc(chartLoadError)}<p><a class="charts-external" href="${esc(airport.url)}" target="_blank" rel="noopener">Открыть исходный PDF ↗</a></p><button class="btn" id="chartRetry">Повторить</button></div>`:plates.length?plates.map(p=>`<button class="charts-plate ${chartOpened?.icao===airport.icao&&chartOpened?.page===p.page?'selected':''}" data-chart-page="${p.page}"><strong>${esc(p.title)}</strong><small>${esc(p.code||'Схема')} · PDF стр. ${p.page}</small></button>`).join(''):`<div class="charts-plate-status">${all.length?'Для этого фильтра листов не найдено. Попробуйте ALL.':'Индекс пока не загружен.'}</div>`}</div></section><section class="charts-mainpanel"><div class="charts-mainhead"><div><h2>${airport.icao} · ${CHART_TYPES.find(t=>t.id===chartType)?.name}</h2><p>${plates.length} схем · Нажми на схему слева, чтобы посмотреть её справа</p></div><a class="charts-external" href="${esc(airport.url)}" target="_blank" rel="noopener">Полный PDF ↗</a></div><div class="charts-mainbody" id="chartsMainBody"><div class="preview-plane">▤</div><h3>Выбери схему</h3><div>Выбранный лист будет показан справа от списка.</div></div></section></div><p class="charts-notice">Источник: каталог PortalPasha (обновляется автоматически). Обновление и действительность схем проверяйте по официальному AIP/NOTAM. Просмотр PDF требует подключения к интернету.</p></div>`;
+ const platesScroll=host.querySelector('.charts-plates');if(platesScroll)platesScroll.scrollTop=scrollBefore;
  const inp=$('chartsSearch');inp.oninput=()=>{
  const caret=inp.selectionStart;chartQuery=inp.value;const q=chartQuery.trim().toUpperCase();
  const match=CHART_PACKS.find(a=>a.icao===q||a.iata===q);
@@ -909,12 +928,13 @@ async function renderFullChart(){
   const lib=await ensurePdfJs();
   if(chartPdfKey!==info.icao){chartPdf=await lib.getDocument({url:chartSourcePdf(info.icao)}).promise;chartPdfKey=info.icao}
   const page=await chartPdf.getPage(info.page);
-  const natural=page.getViewport({scale:1,rotation:chartRotation});
+  const correctRotation=((page.rotate||0)+chartRotation)%360;
+  const natural=page.getViewport({scale:1,rotation:correctRotation});
   const width=Math.max(260,wrap.clientWidth-44);
   const height=Math.max(360,wrap.clientHeight-40);
   // Every sheet initially fits the same viewer area regardless of PDF page dimensions.
   const fitScale=Math.min(width/natural.width,height/natural.height);
-  const viewport=page.getViewport({scale:fitScale*chartModalScale,rotation:chartRotation});
+  const viewport=page.getViewport({scale:fitScale*chartModalScale,rotation:correctRotation});
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
   const pixelRatio=Math.min(window.devicePixelRatio||1,2);
   canvas.width=Math.ceil(viewport.width*pixelRatio);canvas.height=Math.ceil(viewport.height*pixelRatio);
