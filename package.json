@@ -1,7 +1,7 @@
 {
   "name": "flight-atlas",
   "productName": "Flight Atlas",
-  "version": "6.0.4",
+  "version": "6.0.5",
   "description": "Flight Atlas flight planning and simulator companion",
   "main": "main.js",
   "author": "Flight Atlas",
@@ -46,7 +46,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "artifactName": "Flight-Atlas-Setup-${version}.${ext}"
     },
     "publish": {
       "provider": "github",
