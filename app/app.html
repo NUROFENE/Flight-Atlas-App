@@ -156,7 +156,15 @@ body.theme-black .mod-dialog{background:#17191d;border-color:#444b56}
 
 /* Profile update and startup notification */
 .profile-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}.profile-heading h1{margin:6px 0}.profile-update-btn{background:#1d304b;border:1px solid #456486;color:#f7fbff;padding:11px 15px;border-radius:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:10px}.profile-update-btn:hover{background:#2c4666}.profile-update-btn:disabled{opacity:.6;cursor:wait}.profile-update-btn span{font-size:11px;color:#a9d6fc;font-weight:500}.atlas-start-toast{position:fixed;right:22px;bottom:22px;z-index:99999;max-width:min(360px,calc(100vw - 32px));background:#fff;color:#19202a;box-shadow:0 12px 38px #0007;border:1px solid #e5e8ee;border-radius:12px;padding:13px 16px;display:flex;gap:10px;align-items:flex-start;transition:opacity .25s,transform .25s;font-family:inherit}.atlas-start-toast.is-hidden{opacity:0;transform:translateY(12px);pointer-events:none}.atlas-toast-icon{background:#e9f7ee;color:#14804b;border-radius:8px;width:32px;height:32px;display:grid;place-items:center;font-size:17px;flex-shrink:0}.atlas-toast-title{font-size:12px;font-weight:750;color:#151b25}.atlas-toast-sub{font-size:11px;color:#616d7f;margin-top:3px;line-height:1.4}@media(max-width:600px){.profile-heading{align-items:flex-start}.profile-update-btn{padding:9px;font-size:12px}.atlas-start-toast{right:12px;bottom:12px}}
-.mods-card-image.mods-image-unavailable{background:linear-gradient(135deg,#19324d,#101c2c)}.mods-card-image.mods-image-unavailable:after{content:'✈';color:#6cbcff;display:grid;place-items:center;height:100%;font-size:46px}.profile-help-link{font-size:11px;color:#8595ac;text-decoration:none;display:inline-block;margin-top:3px}.profile-help-link:hover{color:#bcdfff}</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><style>
+.mods-card-image.mods-image-unavailable{background:linear-gradient(135deg,#19324d,#101c2c)}.mods-card-image.mods-image-unavailable:after{content:'✈';color:#6cbcff;display:grid;place-items:center;height:100%;font-size:46px}.profile-help-link{font-size:11px;color:#8595ac;text-decoration:none;display:inline-block;margin-top:3px}.profile-help-link:hover{color:#bcdfff}
+#atlasUpdateScreen{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:#060e1ce8;backdrop-filter:blur(10px)}
+#atlasUpdateScreen.open{display:flex}
+.atlas-update-surface{width:min(440px,calc(100vw - 38px));background:linear-gradient(150deg,#182b45,#0e1727);border:1px solid #41658d;border-radius:20px;box-shadow:0 25px 100px #0009;text-align:center;padding:42px 34px 26px;color:#eff8ff}
+.atlas-update-brand{margin:0 auto 16px;background:linear-gradient(135deg,#93dcff,#367dd2);width:82px;height:82px;display:grid;place-items:center;border-radius:23px;color:#0b1b32;font-size:45px;transform:rotate(-5deg)}
+.atlas-update-name{font-size:24px;font-weight:900;letter-spacing:2px}.atlas-update-description{color:#a5bfd9;font-size:13px;margin:8px 0 32px}
+.atlas-update-track{height:8px;border-radius:99px;background:#31445d;overflow:hidden}.atlas-update-track>div{height:100%;width:0%;background:linear-gradient(90deg,#318fff,#79d5ff);transition:width .25s ease;border-radius:99px}
+.atlas-update-percentage{font-size:13px;font-weight:700;margin-top:12px}.atlas-update-dismiss{background:transparent;border:0;color:#8ca9c7;margin-top:20px;font-size:12px}
+</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><style>
 #saveProfile.saved-ok,#saveProfile.saved-ok:hover{background:#168350!important;border-color:#35cc89!important;color:#fff!important;box-shadow:0 0 0 1px #2eba7a55}
 #activeView .wx-cards.wx-few{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start}
 #activeView .wx-cards.wx-few .wx-card{padding:17px}
@@ -916,6 +924,10 @@ renderLobby();renderSidebar();refreshProfileSidebar();
 (()=>{
 const desktop=window.flightAtlasDesktop;if(!desktop)return;
 let available=false,downloaded=false,pendingVersion='',installedVersion='',toastTimer;
+const updateScreen=document.createElement('div');updateScreen.id='atlasUpdateScreen';updateScreen.innerHTML='<div class="atlas-update-surface"><div class="atlas-update-brand">✈</div><div class="atlas-update-name">FLIGHT ATLAS</div><div class="atlas-update-description" id="atlasUpdateDescription">Подготовка обновления…</div><div class="atlas-update-track"><div id="atlasUpdateProgress"></div></div><div class="atlas-update-percentage" id="atlasUpdatePercent">0%</div><button class="atlas-update-dismiss" id="atlasUpdateDismiss" type="button">Скрыть</button></div>';
+document.body.appendChild(updateScreen);updateScreen.querySelector('#atlasUpdateDismiss').onclick=()=>updateScreen.classList.remove('open');
+function progressScreen(n,label){updateScreen.classList.add('open');updateScreen.querySelector('#atlasUpdateDescription').textContent=label;updateScreen.querySelector('#atlasUpdateProgress').style.width=Math.max(0,Math.min(100,n))+'%';updateScreen.querySelector('#atlasUpdatePercent').textContent=Math.round(n)+'%';}
+
 const toast=document.createElement('div');
 toast.className='atlas-start-toast';
 toast.setAttribute('role','status');
@@ -935,17 +947,17 @@ desktop.onUpdate(info=>{
  if(info.type==='checking')setLabel('Проверка…');
  if(info.type==='current'){available=false;setLabel('Актуально');showToast('Установлена актуальная версия','Flight Atlas v'+(installedVersion||'—')+' · обновлений нет');}
  if(info.type==='available'){available=true;pendingVersion=info.version;setLabel('v'+info.version+' доступна');showToast('Доступно обновление v'+info.version,'Откройте личный кабинет и нажмите Update',10000);}
- if(info.type==='progress')setLabel(Math.round(info.percent)+'%');
- if(info.type==='downloaded'){downloaded=true;setLabel('Установка…');showToast('Обновление загружено','Подготавливаем установку и перезапуск…',10000);}
- if(info.type==='error'){setLabel('Ошибка проверки');showToast('Не удалось проверить обновления','Установлена v'+(installedVersion||'—')+' · проверьте подключение к интернету',8500);}
+ if(info.type==='progress'){setLabel(Math.round(info.percent)+'%');progressScreen(info.percent,'Загрузка обновления v'+(pendingVersion||'')+'…');}
+ if(info.type==='downloaded'){progressScreen(100,'Загружено. Устанавливаем и перезапускаем приложение…');downloaded=true;setLabel('Установка…');showToast('Обновление загружено','Подготавливаем установку и перезапуск…',10000);}
+ if(info.type==='error'){updateScreen.classList.remove('open');setLabel('Ошибка проверки');showToast('Не удалось проверить обновления','Установлена v'+(installedVersion||'—')+' · проверьте подключение к интернету',8500);}
 });
 document.addEventListener('click',async event=>{
  const button=event.target.closest('#atlasUpdate');if(!button||downloaded)return;
  if(!available){setLabel('Проверка…');const result=await desktop.checkUpdates();if(!result.ok){setLabel('Ошибка');alert('Не удалось проверить обновления: '+result.error);}return;}
  if(!confirm('Скачать и установить Flight Atlas v'+pendingVersion+'? Приложение будет перезапущено.'))return;
- button.disabled=true;setLabel('Загрузка…');
+ button.disabled=true;setLabel('Загрузка…');progressScreen(0,'Подключаемся к серверу обновлений…');
  const result=await desktop.installUpdate();
- if(!result.ok){alert('Не удалось установить обновление: '+result.error);button.disabled=false;setLabel('Повторить');}
+ if(!result.ok){updateScreen.classList.remove('open');alert('Не удалось установить обновление: '+result.error);button.disabled=false;setLabel('Повторить');}
 });
 setTimeout(async()=>{const result=await desktop.checkUpdates().catch(e=>({ok:false,error:e.message}));if(!result?.ok)showToast('Flight Atlas · v'+(installedVersion||'—'),'Не удалось проверить актуальность версии',8500);},2000);
 })();
