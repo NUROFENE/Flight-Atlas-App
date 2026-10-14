@@ -277,7 +277,7 @@ body.theme-black .mod-dialog{background:#17191d;border-color:#444b56}
 .charts-cat-pill:hover{filter:brightness(1.23)}
 .chart-inline-canvaswrap{align-items:center}
 </style><style id="fa-charts-scroll-fix">
-body:has(#chartsView:not([style*="display: none"])) {overflow:hidden!important}
+body:has(#chartsView[style*="block"]) {overflow:hidden!important}
 #chartsView{height:calc(100dvh - 85px)!important;max-height:calc(100dvh - 85px)!important;min-height:0!important;overflow:hidden!important}
 #chartsView .charts-shell,#chartsView .charts-workspace,#chartsView .charts-sidebar{min-height:0!important;overflow:hidden!important}
 #chartsView .charts-plates{overflow-y:auto!important;overscroll-behavior:contain!important}
