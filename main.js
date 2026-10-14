@@ -114,10 +114,10 @@ function setupUpdater(){
  ipcMain.handle('updater:install',async()=>{
   if(!updaterConfigured())return {ok:false,error:'Обновления недоступны в этой сборке.'};
   try {
-   if(ready){setImmediate(()=>autoUpdater.quitAndInstall(false,true));return {ok:true};}
+   if(ready){setImmediate(()=>autoUpdater.quitAndInstall(true,true));return {ok:true};}
    await autoUpdater.downloadUpdate();
    if(!ready)throw Error('Обновление не завершило загрузку.');
-   setImmediate(()=>autoUpdater.quitAndInstall(false,true));
+   setImmediate(()=>autoUpdater.quitAndInstall(true,true));
    return {ok:true};
   }catch(e){emit('error',{message:e.message});return {ok:false,error:e.message}}
  });
