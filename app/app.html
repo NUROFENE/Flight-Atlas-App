@@ -694,7 +694,7 @@ function bindOFPPageNavigation(){
  }));
 }
 function geoCoords(icao){const row=AIRDATA.find(a=>a[0]===icao);return row?[row[2],row[3]]:null}
-function ofpRouteMap(d){return `<div id="geoRouteMap" class="geo-map" aria-label="Географическая карта маршрута и запасных аэропортов"></div><div class="map-legend"><span><b>Голубой:</b> основной маршрут</span><span><b>Оранжевый:</b> направления к запасным</span><span><b>Карта:</b> Apple Maps /frame · маршрут поверх</span><span id="mapBordersNote"></span></div><div id="mapNote" class="ofp-muted"></div>`}
+function ofpRouteMap(d){return `<div id="geoRouteMap" class="geo-map" aria-label="Карта маршрута и запасных аэродромов"></div>`}
 function alternateRouteMarkup(d){const alts=[...(activeFlight?.alts||[]),...(d.alternates||[]),d.alternate].filter(Boolean);const unique=[...new Set(alts)].filter(a=>a!==d.orig&&a!==d.dest);return `<div class="alternate-route-list">${unique.length?unique.map((a,i)=>{const route=d.alternateRoutes?.[a];return `<div class="alt-route-row"><span><b>${i+1}. ${esc(d.dest)} → ${esc(a)}</b><br><small>${esc(airport(d.dest))} → ${esc(airport(a))}</small>${route?.length?`<div class="alt-route-waypoints">${route.map(p=>esc(p)).join(' → ')}</div>`:`<div class="alt-route-waypoints" style="color:#e4ad85">SimBrief не передал маршрут на этот запасной</div>`}</span></div>`}).join(''):'<p>Запасные аэродромы не выбраны.</p>'}</div>`}let leafletMap=null;
 async function renderGeoMap(){
  const target=document.getElementById('geoRouteMap'),d=ofpState.data;
@@ -713,16 +713,19 @@ async function renderGeoMap(){
  const latMin=Math.min(...points.map(p=>p[0])),latMax=Math.max(...points.map(p=>p[0])),lonMin=Math.min(...points.map(p=>p[1])),lonMax=Math.max(...points.map(p=>p[1]));
  const view={lat:(latMin+latMax)/2,lon:(lonMin+lonMax)/2,spanLat:Math.max(1.8,(latMax-latMin)*1.4),spanLon:Math.max(2.5,(lonMax-lonMin)*1.4)};
  view.spanLat=Math.min(150,view.spanLat);view.spanLon=Math.min(350,view.spanLon);
- const iframe=document.createElement('iframe');iframe.className='apple-frame';iframe.title='Apple Maps — картографическая подложка';iframe.loading='eager';iframe.referrerPolicy='strict-origin-when-cross-origin';target.appendChild(iframe);
+ const iframe=document.createElement('iframe');iframe.className='apple-frame';iframe.title='Google Maps — картографическая подложка';iframe.loading='eager';iframe.referrerPolicy='strict-origin-when-cross-origin';target.appendChild(iframe);
  const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');overlay.classList.add('apple-overlay');overlay.setAttribute('viewBox','0 0 1000 650');overlay.setAttribute('preserveAspectRatio','none');target.appendChild(overlay);
- const status=document.createElement('div');status.className='apple-map-status';status.textContent='Apple Maps · маршрут SimBrief';target.appendChild(status);
+ 
  const popup=document.createElement('div');popup.className='apple-point-popup';popup.hidden=true;target.appendChild(popup);
  const ns='http://www.w3.org/2000/svg';
  const element=(name,attrs={})=>{const el=document.createElementNS(ns,name);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,String(v));return el};
  const coords=p=>[(p[1]-(view.lon-view.spanLon/2))/view.spanLon*1000,(view.lat+view.spanLat/2-p[0])/view.spanLat*650];
  const displayMap=()=>{
   const params=new URLSearchParams({center:view.lat.toFixed(6)+','+view.lon.toFixed(6),span:view.spanLat.toFixed(6)+','+view.spanLon.toFixed(6),map:'satellite'});
-  iframe.src='https://maps.apple.com/frame?'+params.toString();
+  const kmPerDegree=Math.max(.15,Math.cos(view.lat*Math.PI/180));
+  const neededLon=Math.max(view.spanLon,view.spanLat/kmPerDegree);
+  const zoom=Math.max(2,Math.min(17,Math.round(Math.log2(360/neededLon))));
+  iframe.src='https://maps.google.com/maps?'+new URLSearchParams({ll:view.lat.toFixed(6)+','+view.lon.toFixed(6),z:String(zoom),t:'k',output:'embed'}).toString();
  };
  let updateTimer=null;
  const scheduleFrame=()=>{clearTimeout(updateTimer);updateTimer=setTimeout(displayMap,250)};
@@ -753,8 +756,7 @@ async function renderGeoMap(){
  overlay.addEventListener('pointermove',e=>{if(!pan)return;const [dx,dy]=clientToSvg(e.clientX-pan.x,e.clientY-pan.y);view.lon=pan.lon-dx/1000*view.spanLon;view.lat=pan.lat+dy/650*view.spanLat;render();scheduleFrame()});
  const stopPan=()=>{pan=null;overlay.classList.remove('dragging')};overlay.addEventListener('pointerup',stopPan);overlay.addEventListener('pointercancel',stopPan);
  overlay.addEventListener('wheel',e=>{e.preventDefault();const factor=e.deltaY>0?1.22:1/1.22;view.spanLat=Math.max(.07,Math.min(150,view.spanLat*factor));view.spanLon=Math.max(.07,Math.min(350,view.spanLon*factor));render();scheduleFrame()},{passive:false});
- const note=document.getElementById('mapNote');if(note)note.textContent='Apple Maps как подложка; точки и маршрут нанесены по координатам SimBrief. Колесо мыши — масштаб, ЛКМ — перемещение. При недоступности Apple Maps маршрут останется видимым.';
- const legend=document.getElementById('mapBordersNote');if(legend)legend.textContent='Apple Maps satellite · SimBrief overlay';
+
 }
 function updateOFPPanel(){const box=$('ofpContainer');if(!box)return;box.innerHTML=ofpMarkup();document.querySelectorAll('.ofp-tab').forEach(b=>b.onclick=()=>{ofpTab=b.dataset.tab;updateOFPPanel()});populateOFPFrame();if(ofpTab==='raw')bindOFPPageNavigation();if(ofpTab==='map')setTimeout(renderGeoMap,80);}
 function populateOFPFrame(){const frame=$('ofpFrame');if(!frame||!ofpState.data)return;const d=ofpState.data;const content=d.html||('<pre>'+esc(d.plain||'В ответе SimBrief нет форматированного OFP.')+'</pre>');frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><style>body{background:#fff;color:#111;margin:18px;font-family:Arial,sans-serif}table{max-width:100%}pre{white-space:pre-wrap}img{max-width:100%}</style></head><body>'+content+'</body></html>';}
