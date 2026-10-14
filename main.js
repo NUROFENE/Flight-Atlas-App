@@ -101,7 +101,7 @@ function setupUpdater(){
  autoUpdater.setFeedURL({provider:'github',owner:'NUROFENE',repo:'Flight-Atlas-App'});
  let ready=false;
  autoUpdater.on('checking-for-update',()=>emit('checking'));
- autoUpdater.on('update-available',info=>emit('available',{version:info.version}));
+ autoUpdater.on('update-available',info=>emit('available',{version:info.version,releaseNotes:info.releaseNotes||''}));
  autoUpdater.on('update-not-available',()=>emit('current'));
  autoUpdater.on('download-progress',info=>emit('progress',{percent:Math.round(info.percent)}));
  autoUpdater.on('update-downloaded',info=>{ready=true;emit('downloaded',{version:info.version})});
