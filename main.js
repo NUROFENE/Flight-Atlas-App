@@ -84,11 +84,11 @@ async function handle(request){try{
  }catch(err){const message=String(err?.message||err);return failure(message,/ENOENT/.test(message)?404:502)}
 }
 function emit(type,extra={}){if(win&&!win.isDestroyed())win.webContents.send('updater:event',{type,...extra})}
-function updaterConfigured(){return app.isPackaged && process.env.FLIGHT_ATLAS_DISABLE_UPDATES!=='1' && updaterOwner()!=='CHANGE_ME'}
-function updaterOwner(){try{return require('./package.json').build.publish.owner}catch{return 'CHANGE_ME'}}
+function updaterConfigured(){return app.isPackaged && process.env.FLIGHT_ATLAS_DISABLE_UPDATES!=='1'}
 function setupUpdater(){
  autoUpdater.autoDownload=false;
  autoUpdater.autoInstallOnAppQuit=false;
+ autoUpdater.setFeedURL({provider:'github',owner:'NUROFENE',repo:'Flight-Atlas-App'});
  let ready=false;
  autoUpdater.on('checking-for-update',()=>emit('checking'));
  autoUpdater.on('update-available',info=>emit('available',{version:info.version}));
