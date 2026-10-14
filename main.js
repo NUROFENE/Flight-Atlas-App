@@ -86,16 +86,31 @@ async function handle(request){try{
 function emit(type,extra={}){if(win&&!win.isDestroyed())win.webContents.send('updater:event',{type,...extra})}
 function updaterConfigured(){return app.isPackaged && process.env.FLIGHT_ATLAS_DISABLE_UPDATES!=='1' && updaterOwner()!=='CHANGE_ME'}
 function updaterOwner(){try{return require('./package.json').build.publish.owner}catch{return 'CHANGE_ME'}}
-function setupUpdater(){autoUpdater.autoDownload=false;autoUpdater.autoInstallOnAppQuit=true;
+function setupUpdater(){
+ autoUpdater.autoDownload=false;
+ autoUpdater.autoInstallOnAppQuit=false;
+ let ready=false;
  autoUpdater.on('checking-for-update',()=>emit('checking'));
  autoUpdater.on('update-available',info=>emit('available',{version:info.version}));
  autoUpdater.on('update-not-available',()=>emit('current'));
  autoUpdater.on('download-progress',info=>emit('progress',{percent:Math.round(info.percent)}));
- autoUpdater.on('update-downloaded',info=>emit('downloaded',{version:info.version}));
+ autoUpdater.on('update-downloaded',info=>{ready=true;emit('downloaded',{version:info.version})});
  autoUpdater.on('error',err=>emit('error',{message:err.message}));
  ipcMain.handle('app:version',()=>app.getVersion());
- ipcMain.handle('updater:check',async()=>{if(!updaterConfigured())return {ok:false,error:'Обновления работают после публикации подписанного релиза.'};try{await autoUpdater.checkForUpdates();return {ok:true}}catch(e){return {ok:false,error:e.message}}});
- ipcMain.handle('updater:install',async()=>{try{if(!updaterConfigured())throw Error('Updater not configured');await autoUpdater.downloadUpdate();emit('downloaded');setTimeout(()=>autoUpdater.quitAndInstall(false,true),900);return {ok:true}}catch(e){emit('error',{message:e.message});return {ok:false,error:e.message}}});
+ ipcMain.handle('updater:check',async()=>{
+  if(!updaterConfigured())return {ok:false,error:'Обновления недоступны в этой сборке.'};
+  try {await autoUpdater.checkForUpdates();return {ok:true}}catch(e){return {ok:false,error:e.message}}
+ });
+ ipcMain.handle('updater:install',async()=>{
+  if(!updaterConfigured())return {ok:false,error:'Обновления недоступны в этой сборке.'};
+  try {
+   if(ready){setImmediate(()=>autoUpdater.quitAndInstall(false,true));return {ok:true};}
+   await autoUpdater.downloadUpdate();
+   if(!ready)throw Error('Обновление не завершило загрузку.');
+   setImmediate(()=>autoUpdater.quitAndInstall(false,true));
+   return {ok:true};
+  }catch(e){emit('error',{message:e.message});return {ok:false,error:e.message}}
+ });
 }
 function buildWindow(){win=new BrowserWindow({width:1500,height:940,minWidth:1000,minHeight:650,backgroundColor:'#0b1322',title:'Flight Atlas',show:false,icon:path.join(ROOT,'FlightAtlas.ico'),webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  win.once('ready-to-show',()=>win.show());win.loadURL('atlas://flightatlas/');
