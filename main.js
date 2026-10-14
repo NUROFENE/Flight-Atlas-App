@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,protocol,net,shell,dialog}=require('electron');
+const {app,BrowserWindow,protocol,net,shell,dialog,Menu}=require('electron');
 const path=require('node:path');
 const fs=require('node:fs/promises');
 const fsSync=require('node:fs');
@@ -86,6 +86,16 @@ async function handle(request){try{
 function emit(type,extra={}){if(win&&!win.isDestroyed())win.webContents.send('updater:event',{type,...extra})}
 function updaterConfigured(){return app.isPackaged && process.env.FLIGHT_ATLAS_DISABLE_UPDATES!=='1'}
 function setupUpdater(){
+ ipcMain.handle('weather:metar',async(_e,ids)=>{
+  if(!/^[A-Z0-9]{4}(,[A-Z0-9]{4}){0,6}$/.test(ids))throw Error('Недопустимые ICAO');
+  const response=await getRemote('https://aviationweather.gov/api/data/metar?ids='+encodeURIComponent(ids)+'&format=json','application/json',30);
+  return response.json();
+ });
+ ipcMain.handle('flight:simbrief',async(_e,id)=>{
+  if(!/^\d{1,10}$/.test(id))throw Error('Неверный SimBrief Pilot ID');
+  const response=await getRemote('https://www.simbrief.com/api/xml.fetcher.php?userid='+id,'application/xml',40);
+  return response.text();
+ });
  autoUpdater.autoDownload=false;
  autoUpdater.autoInstallOnAppQuit=false;
  autoUpdater.setFeedURL({provider:'github',owner:'NUROFENE',repo:'Flight-Atlas-App'});
@@ -112,7 +122,7 @@ function setupUpdater(){
   }catch(e){emit('error',{message:e.message});return {ok:false,error:e.message}}
  });
 }
-function buildWindow(){win=new BrowserWindow({width:1500,height:940,minWidth:1000,minHeight:650,backgroundColor:'#0b1322',title:'Flight Atlas',show:false,icon:path.join(ROOT,'FlightAtlas.ico'),webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+function buildWindow(){Menu.setApplicationMenu(null);win=new BrowserWindow({width:1500,height:940,minWidth:1000,minHeight:650,backgroundColor:'#0b1322',title:'Flight Atlas',show:false,autoHideMenuBar:true,icon:path.join(ROOT,'FlightAtlas.ico'),webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  win.once('ready-to-show',()=>win.show());win.loadURL('atlas://flightatlas/');
  win.webContents.setWindowOpenHandler(({url})=>{if(/^https:\/\//i.test(url))shell.openExternal(url);return {action:'deny'}});
  win.webContents.on('will-navigate',(ev,url)=>{if(!url.startsWith('atlas://flightatlas/')){ev.preventDefault();if(/^https:\/\//i.test(url))shell.openExternal(url)}});
