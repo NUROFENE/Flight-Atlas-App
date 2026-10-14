@@ -338,6 +338,20 @@ html body #atlasUpdateConfirm{position:fixed!important;inset:0!important;top:0!i
 html body #atlasUpdateConfirm:not(.open){display:none!important}
 html body #atlasUpdateConfirm.open{display:flex!important}
 html body #atlasUpdateConfirm>.confirm-card{position:relative!important;flex:none!important;margin:auto!important;box-sizing:border-box!important;width:min(530px,calc(100vw - 40px))!important;max-height:calc(100dvh - 48px)!important;overflow-y:auto!important;transform:none!important}
+</style><style id="fa-apple-frame-overlay">
+#geoRouteMap{position:relative!important;overflow:hidden!important;background:#102136!important;min-height:560px!important}
+#geoRouteMap .apple-frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;pointer-events:none;background:#102136}
+#geoRouteMap .apple-overlay{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#geoRouteMap .apple-overlay.dragging{cursor:grabbing}
+#geoRouteMap .apple-map-status{position:absolute;top:12px;left:12px;z-index:5;background:#081928e0;padding:7px 11px;border-radius:8px;color:#dceafa;font-size:11px;pointer-events:none}
+#geoRouteMap .apple-point-popup{position:absolute;z-index:8;max-width:260px;background:#0c1d30f5;color:#f1f6ff;border:1px solid #4b81ac;border-radius:10px;padding:12px 14px;box-shadow:0 10px 28px #0009;font-size:12px;line-height:1.7}
+#geoRouteMap .apple-point-popup strong{color:#9ed7ff;font-size:14px}
+#geoRouteMap .apple-point-popup button{float:right;color:#bedcf5;background:transparent;border:0;font-size:17px;padding:0 0 0 12px}
+#geoRouteMap .apple-overlay .route-main{fill:none;stroke:#00cbff;stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 3px #02121b)}
+#geoRouteMap .apple-overlay .route-alt{fill:none;stroke:#ffac50;stroke-width:3;stroke-dasharray:9 6;filter:drop-shadow(0 0 3px #06121c)}
+#geoRouteMap .apple-overlay .map-fix{cursor:pointer;stroke:white;stroke-width:1.5;fill:#16bced}
+#geoRouteMap .apple-overlay .map-airport{cursor:pointer;stroke:#f1faff;stroke-width:2;fill:#51df9b}
+#geoRouteMap .apple-overlay text{fill:#fff;paint-order:stroke;stroke:#071525;stroke-width:3;font:bold 11px system-ui;pointer-events:none}
 </style></style></head><body><div class="layout"><aside><div class="brand"><div class="logo">✈</div><div><strong>FLIGHT ATLAS</strong><small>RUSSIAN AIRLINES / MSFS</small></div></div><button id="homeNav" class="home-btn">⌂  Главная · все авиакомпании</button><button id="chartsNav" class="home-btn charts-nav">▤  Charts · схемы аэропортов</button><div class="sidebar-carriers"><div class="section">АВИАКОМПАНИИ</div><div class="airlines" id="airlines"></div></div><div class="sidebar-foot"><button id="activeFlightNav" class="active-flight-nav" style="display:none"><span class="nav-icon">◉</span><span><strong>АКТИВНЫЙ ПОЛЁТ</strong><small id="activeFlightShort">Маршрут подтверждён</small></span><span>›</span></button><button id="profileNav" class="pilot-sidebar-card" title="Открыть личный кабинет"><span id="profileNavAvatar" class="pilot-sidebar-avatar">✈</span><span class="pilot-sidebar-details"><strong id="profileNavSub">Пилот</strong><small>Личный кабинет</small></span></button></div></aside><main><div id="lobbyPage"><div class="top"><span class="status"><span class="dot"></span> FLIGHT ATLAS v6.0 / DESKTOP</span></div><div class="lobby-header"><div><div class="eyebrow">ВЫБЕРИТЕ АВИАКОМПАНИЮ</div><h1 style="font-size:40px;margin:5px 0 4px">Куда полетим?</h1><p style="color:#92a1ba;margin:0">Каталог авиакомпаний и маршрутов</p></div><button class="btn primary" id="randomizer">⚄ Randomizer</button></div><div class="stats lobby-stats"><div class="stat"><div id="lobbyAirlines" class="value">19</div><div class="label">Авиакомпаний в списке</div></div><div class="stat"><div id="lobbyRoutes" class="value">0</div><div class="label">Записей о маршрутах</div></div></div><div id="randomResult" class="random-result"></div><div class="lobby-grid" id="lobbyTiles"></div><div class="lobby-note"></div></div><div id="routesPage" style="display:none"><button id="backLobby" class="btn sm back-lobby">← Все авиакомпании</button><div class="top"><div class="status"><span class="dot"></span> Маршрутный каталог · проверенный снимок 13.10.2026</div></div><section class="hero"><div><div class="eyebrow"></div><h1 id="title">Российские авиалинии</h1><p id="subtitle">Выберите авиакомпанию и маршрут для полёта.</p></div><div class="plane">✈</div></section><div class="stats routes-stats"><div class="stat"><div class="value" id="numAirlines">0</div><div class="label">Авиакомпаний в списке</div></div><div class="stat"><div class="value" id="numRoutes">0</div><div class="label">Записей о маршрутах</div></div><div class="stat"><div class="value" id="numShown">0</div><div class="label">Показано рейсов</div></div></div><div class="controls"><div class="search"><input id="search" placeholder="⌕  Город, ICAO, рейс, самолёт..."></div><select id="origin"><option value="">Все аэропорты вылета</option></select><select id="duration"><option value="9999">Любая длительность</option><option value="120">До 2 часов</option><option value="180">До 3 часов</option><option value="240">До 4 часов</option><option value="300">До 5 часов</option></select></div><div class="meta"><span id="meta">Сортировка: короткие рейсы первыми</span></div><div class="tablewrap"><div style="color:#aab9ce;font-size:12px;margin:8px 0;padding-left:12px">* Тип ВС предварительный (по флоту/маршруту), проверь перед планированием SimBrief.</div><table><thead><tr><th>Маршрут</th><th>Рейс</th><th>Тип ВС</th><th>В пути</th><th>План полёта</th><th aria-label="Сценарии">Сценарии</th></tr></thead><tbody id="rows"></tbody></table><div id="empty" class="empty" style="display:none"><strong>Нет проверенных рейсов</strong>На выбранную дату данные этого перевозчика ещё не сверены либо фильтр не дал результатов.</div></div><div class="footer">Длительность ориентировочная; перед планированием проверяйте расписание и самолёт.</div></div><div id="activeView" style="display:none"></div><div id="profileView" style="display:none"></div><div id="chartsView" style="display:none"></div></main></div><div class="overlay" id="overlay"><div class="modal"><h2 id="modalTitle">Экспорт в SimBrief</h2><p>Проверьте маршрут и запасные аэродромы, затем подтвердите полёт или откройте SimBrief.</p><div class="notice" id="modalNotice">План будет создан на сайте SimBrief после входа в аккаунт.</div><div class="grid"><div><label>ICAO вылета</label><input id="mOrig" maxlength="4"></div><div><label>ICAO назначения</label><input id="mDest" maxlength="4"></div><div><label>Код авиакомпании ICAO</label><input id="mAirline" maxlength="3"></div><div><label>Номер рейса (только цифры)</label><input id="mFlight"></div><div><label>Код типа самолёта</label><input id="mType"></div><div><label>Продолжительность (чч:мм)</label><input id="mTime"></div><div><label>Количество запасных</label><select class="alt-count-select" id="mAltCount" aria-label="Количество запасных аэродромов"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select></div><div><label>Alternate 1 (ICAO)</label><input id="mAlt1" maxlength="4"></div><div><label>Alternate 2 (ICAO)</label><input id="mAlt2" maxlength="4"></div><div><label>Alternate 3 (ICAO)</label><input id="mAlt3" maxlength="4"></div><div id="mAlt4Wrap"><label>Alternate 4 (ICAO)</label><input id="mAlt4" maxlength="4"></div></div><div class="actions"><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="closeModal">Закрыть</button><button class="btn" id="recalcAlt">↻ Подобрать запасные</button></div><div style="display:flex;gap:9px"><button class="btn" id="copySimbrief">Копировать ссылку</button><button class="btn primary" id="confirmFlight">✓ Подтвердить</button><button class="btn primary" id="openSimbrief">Открыть SimBrief ↗</button></div></div></div></div><div class="mod-dialog-overlay" id="modDialogOverlay" role="presentation" aria-hidden="true"><section class="mod-dialog" role="dialog" aria-modal="true" aria-labelledby="modDialogTitle"><button class="mod-dismiss" type="button" id="modDialogClose" aria-label="Закрыть">×</button><div id="modDialogBody" class="mod-dialog-shell"><h2 id="modDialogTitle">Моды самолёта</h2><p class="mod-dialog-lead">Подборка доступных модов для выбранного типа.</p><div class="mod-list" id="modDialogList"></div></div></section></div><div id="sceneOverlay" class="mod-dialog-overlay" aria-hidden="true"><section class="scene-dialog" role="dialog" aria-modal="true" aria-labelledby="sceneTitle"><button id="sceneClose" class="mod-dismiss" aria-label="Закрыть">×</button><h2 id="sceneTitle">Сценарии аэропортов</h2><p class="scene-caption">Дополнения для аэропортов вылета и прибытия</p><div class="scene-pair"><article class="scene-card"><div class="scene-placeholder">▧</div><div class="scene-code" id="sceneFrom">----</div><small id="sceneFromName"></small><div class="scene-future">Сценарий пока не добавлен</div></article><article class="scene-card"><div class="scene-placeholder">▧</div><div class="scene-code" id="sceneTo">----</div><small id="sceneToName"></small><div class="scene-future">Сценарий пока не добавлен</div></article></div></section></div><script src="flight-imports.js"></script><script src="flight-manual.js"></script><script>
 'use strict';
 const CARRIERS=[["Аэрофлот","AFL","SU"],["S7","SBI","S7"],["Победа","PBD","DP"],["Россия","SDM","FV"],["Уральские авиалинии","SVR","U6"],["UTAIR","UTA","UT"],["Nordwind","NWS","N4"],["Smartavia","AUL","5N"],["Red Wings","RWZ","WZ"],["Air Astana","KZR","KC"],["Uzbekistan Airways","UZB","HY"],["Якутия","SYL","R3"],["Азимут","AZO","A4"],["Икар","KAR","EO"],["Belavia","BRU","B2"],["Azerbaijan Airlines","AHY","J2"],["SCAT","VSV","DV"],["Centrum Air","MFX","C6"],["NordStar","TYA","Y7"],["Aurora","SHU","HZ"],["Ямал","LLM","YC"],["Руслайн","RLU","7R"],["Georgian Airways","TGZ","A9"],["Северсталь","SSF","D2"],["Alrosa","DRU","6R"],["SkyUp","SEU","U5"],["Ukraine International","AUI","PS"]];
@@ -676,48 +690,67 @@ function bindOFPPageNavigation(){
  }));
 }
 function geoCoords(icao){const row=AIRDATA.find(a=>a[0]===icao);return row?[row[2],row[3]]:null}
-function ofpRouteMap(d){return `<div id="geoRouteMap" class="geo-map" aria-label="Географическая карта маршрута и запасных аэропортов"></div><div class="map-legend"><span><b>Голубой:</b> основной маршрут</span><span><b>Оранжевый:</b> направления к запасным</span><span><b>Карта:</b> Esri / OpenStreetMap · для Apple Maps требуется MapKit JS</span><span id="mapBordersNote"></span></div><div id="mapNote" class="ofp-muted"></div>`}
+function ofpRouteMap(d){return `<div id="geoRouteMap" class="geo-map" aria-label="Географическая карта маршрута и запасных аэропортов"></div><div class="map-legend"><span><b>Голубой:</b> основной маршрут</span><span><b>Оранжевый:</b> направления к запасным</span><span><b>Карта:</b> Apple Maps /frame · маршрут поверх</span><span id="mapBordersNote"></span></div><div id="mapNote" class="ofp-muted"></div>`}
 function alternateRouteMarkup(d){const alts=[...(activeFlight?.alts||[]),...(d.alternates||[]),d.alternate].filter(Boolean);const unique=[...new Set(alts)].filter(a=>a!==d.orig&&a!==d.dest);return `<div class="alternate-route-list">${unique.length?unique.map((a,i)=>{const route=d.alternateRoutes?.[a];return `<div class="alt-route-row"><span><b>${i+1}. ${esc(d.dest)} → ${esc(a)}</b><br><small>${esc(airport(d.dest))} → ${esc(airport(a))}</small>${route?.length?`<div class="alt-route-waypoints">${route.map(p=>esc(p)).join(' → ')}</div>`:`<div class="alt-route-waypoints" style="color:#e4ad85">SimBrief не передал маршрут на этот запасной</div>`}</span></div>`}).join(''):'<p>Запасные аэродромы не выбраны.</p>'}</div>`}let leafletMap=null;
-async function renderGeoMap(){const target=document.getElementById('geoRouteMap');if(!target||!ofpState.data)return;
- if(leafletMap){leafletMap.remove();leafletMap=null}
- if(typeof L==='undefined'){try{await new Promise((res,rej)=>{let script=document.createElement('script');script.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';script.onload=res;script.onerror=rej;document.head.appendChild(script)})}catch{target.innerHTML='<div class="map-message">Leaflet не загрузился. Проверь соединение.</div>';return}}
- const d=ofpState.data,orig=geoCoords(d.orig)||d.originCoords,dest=geoCoords(d.dest)||d.destinationCoords;
- leafletMap=L.map(target,{worldCopyJump:true,scrollWheelZoom:true,zoomControl:false,preferCanvas:true});
- let imageryErrors=0,tileLoaded=false,fallbackStarted=false,activeTiles=null;
- const noteMap=()=>document.getElementById('mapBordersNote');
- const mapWarning=message=>{const note=noteMap();if(note)note.textContent=message};
- const startBackup=()=>{
-  if(fallbackStarted||document.getElementById('geoRouteMap')!==target)return;
-  fallbackStarted=true;mapWarning('Спутник недоступен · загружается резервная карта OpenStreetMap');
-  if(activeTiles)leafletMap.removeLayer(activeTiles);
-  let backupErrors=0;const backup=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19,crossOrigin:true});
-  activeTiles=backup;backup.on('tileload',()=>{tileLoaded=true;mapWarning('Резервная карта OpenStreetMap')});
-  backup.on('tileerror',()=>{if(++backupErrors>=3)mapWarning('Фон карты недоступен по сети. Маршрут и точки отображаются поверх тёмного фона.')});
-  backup.addTo(leafletMap);
+async function renderGeoMap(){
+ const target=document.getElementById('geoRouteMap'),d=ofpState.data;
+ if(!target||!d)return;
+ if(leafletMap){try{leafletMap.remove()}catch{}leafletMap=null}
+ target.replaceChildren();
+ const route=(d.navpoints||[]).filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180);
+ const geo=x=>{const coords=geoCoords(x);return coords&&Number.isFinite(coords[0])&&Number.isFinite(coords[1])?coords:null};
+ const orig=geo(d.orig)||d.originCoords,dest=geo(d.dest)||d.destinationCoords;
+ const mainRoute=route.length>1?route:[orig,dest].filter(Boolean);
+ const altCodes=[...new Set([...(activeFlight?.alts||[]),...(d.alternates||[]),d.alternate].filter(Boolean))].filter(x=>x!==d.orig&&x!==d.dest);
+ const alts=altCodes.map((code,i)=>({code,coords:geo(code),index:i})).filter(x=>x.coords);
+ const fixes=(d.navfixes||[]).filter(f=>Number.isFinite(f.lat)&&Number.isFinite(f.lon));
+ const points=[...mainRoute,...alts.map(a=>a.coords)].filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]));
+ if(!points.length){target.textContent='В SimBrief OFP нет координат для построения карты.';return}
+ const latMin=Math.min(...points.map(p=>p[0])),latMax=Math.max(...points.map(p=>p[0])),lonMin=Math.min(...points.map(p=>p[1])),lonMax=Math.max(...points.map(p=>p[1]));
+ const view={lat:(latMin+latMax)/2,lon:(lonMin+lonMax)/2,spanLat:Math.max(1.8,(latMax-latMin)*1.4),spanLon:Math.max(2.5,(lonMax-lonMin)*1.4)};
+ view.spanLat=Math.min(150,view.spanLat);view.spanLon=Math.min(350,view.spanLon);
+ const iframe=document.createElement('iframe');iframe.className='apple-frame';iframe.title='Apple Maps — картографическая подложка';iframe.loading='eager';iframe.referrerPolicy='strict-origin-when-cross-origin';target.appendChild(iframe);
+ const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');overlay.classList.add('apple-overlay');overlay.setAttribute('viewBox','0 0 1000 650');overlay.setAttribute('preserveAspectRatio','none');target.appendChild(overlay);
+ const status=document.createElement('div');status.className='apple-map-status';status.textContent='Apple Maps · маршрут SimBrief';target.appendChild(status);
+ const popup=document.createElement('div');popup.className='apple-point-popup';popup.hidden=true;target.appendChild(popup);
+ const ns='http://www.w3.org/2000/svg';
+ const element=(name,attrs={})=>{const el=document.createElementNS(ns,name);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,String(v));return el};
+ const coords=p=>[(p[1]-(view.lon-view.spanLon/2))/view.spanLon*1000,(view.lat+view.spanLat/2-p[0])/view.spanLat*650];
+ const displayMap=()=>{
+  const params=new URLSearchParams({center:view.lat.toFixed(6)+','+view.lon.toFixed(6),span:view.spanLat.toFixed(6)+','+view.spanLon.toFixed(6),map:'satellite'});
+  iframe.src='https://maps.apple.com/frame?'+params.toString();
  };
- const imagery=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Imagery © Esri',maxZoom:18,crossOrigin:true});
- activeTiles=imagery;
- imagery.on('tileload',()=>{tileLoaded=true});
- imagery.on('tileerror',()=>{if(++imageryErrors>=3)startBackup()});
- imagery.addTo(leafletMap);
- setTimeout(()=>{if(!tileLoaded&&!fallbackStarted)startBackup()},6000);
- 
- // National boundaries only: no city/country labels. Data loaded independently of the imagery.
- fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json').then(resp=>{if(!resp.ok)throw new Error('Borders unavailable');return resp.json()}).then(data=>{if(leafletMap&&document.getElementById('geoRouteMap')===target)L.geoJSON(data,{style:{color:'#ebf4ff',weight:1,opacity:.7,fill:false},interactive:false}).addTo(leafletMap)}).catch(()=>{const note=document.getElementById('mapBordersNote');if(note)note.textContent='Границы стран временно недоступны'});
- const bounds=[];const point=(icao,coord,color,role)=>{if(!coord)return;bounds.push(coord);L.circleMarker(coord,{radius:8,weight:2,color:'#eaf6ff',fillColor:color,fillOpacity:.96}).bindPopup('<b>'+esc(icao)+'</b><br>'+esc(role)).addTo(leafletMap)};
- point(d.orig,orig,'#40bdff','Вылет');point(d.dest,dest,'#4ee6a3','Назначение');
- const main=(d.navpoints||[]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));const route=main.length>1?main:[orig,dest].filter(Boolean);
- if(route.length>1){L.polyline(route,{color:'#25bfe9',weight:4,opacity:.94}).addTo(leafletMap);bounds.push(...route)}
-  // Navigation fixes shown as aviation waypoints, sourced from SimBrief navlog.
-  const fixes=d.navfixes||[];const step=fixes.length>95?Math.ceil(fixes.length/95):1;
-  fixes.forEach((f,i)=>{if(i%step!==0&&i!==fixes.length-1)return;const c=[f.lat,f.lon];
-   const dot=L.circleMarker(c,{radius:3,weight:1,color:'#b5f1ff',fillColor:'#42caff',fillOpacity:1}).bindPopup('<b>'+esc(f.name)+'</b>'+(f.airway?'<br>Airway: '+esc(f.airway):'')+'<br>Плановая высота: '+(f.altitude?esc(f.altitude)+' ft':'нет данных')+'<br>Плановая скорость: '+(f.ias?esc(f.ias)+' KIAS':f.mach?'M '+esc(f.mach):f.tas?esc(f.tas)+' KTAS':f.groundspeed?esc(f.groundspeed)+' kt GS':'нет данных'));dot.addTo(leafletMap);
-   if(fixes.length<=42||i%Math.max(3,Math.ceil(fixes.length/25))===0)dot.bindTooltip(esc(f.name),{permanent:true,direction:'top',offset:[0,-3],className:'flight-fix-label'});
+ let updateTimer=null;
+ const scheduleFrame=()=>{clearTimeout(updateTimer);updateTimer=setTimeout(displayMap,250)};
+ const poly=(locations,klass)=>{if(locations.length<2)return;const el=element('polyline',{points:locations.map(p=>coords(p).map(v=>v.toFixed(2)).join(',')).join(' '),class:klass});overlay.appendChild(el)};
+ const showPopup=(event,html)=>{
+  popup.replaceChildren();const close=document.createElement('button');close.textContent='×';close.onclick=()=>popup.hidden=true;popup.appendChild(close);
+  const details=document.createElement('div');details.innerHTML=html;popup.appendChild(details);
+  const rect=target.getBoundingClientRect();popup.style.left=Math.max(12,Math.min(rect.width-275,event.clientX-rect.left+12))+'px';popup.style.top=Math.max(12,Math.min(rect.height-140,event.clientY-rect.top+12))+'px';popup.hidden=false;
+ };
+ const circle=(point,css,title,desc,rad=6)=>{const [cx,cy]=coords(point);const dot=element('circle',{cx,cy,r:rad,class:css});dot.addEventListener('click',e=>{e.stopPropagation();showPopup(e,'<strong>'+esc(title)+'</strong><div>'+desc+'</div>')});overlay.appendChild(dot);return dot};
+ const render=()=>{
+  overlay.replaceChildren();popup.hidden=true;
+  poly(mainRoute,'route-main');
+  if(dest)for(const a of alts)poly([dest,a.coords],'route-alt');
+  const step=Math.max(1,Math.ceil(fixes.length/160));
+  fixes.forEach((f,i)=>{if(i%step!==0&&i!==fixes.length-1)return;
+   const detail='Плановая высота: '+(f.altitude?esc(f.altitude)+' ft':'нет данных')+'<div>Плановая скорость: '+(f.ias?esc(f.ias)+' KIAS':f.mach?'M '+esc(f.mach):f.tas?esc(f.tas)+' KTAS':f.groundspeed?esc(f.groundspeed)+' kt GS':'нет данных')+'</div>'+(f.airway?'<div>Airway: '+esc(f.airway)+'</div>':'');
+   circle([f.lat,f.lon],'map-fix',f.name,detail,5);
   });
- const alts=[...new Set([...(activeFlight?.alts||[]),...(d.alternates||[])])];alts.forEach((icao,i)=>{let c=geoCoords(icao),other=d.alternateRoutes?.[icao]||[];point(icao,c,'#ffae55','Запасной '+(i+1));if(dest&&c){const line=other.length>1?other:[dest,c];L.polyline(line,{color:'#fbb45b',weight:3,dashArray:other.length>1?'':'7,7'}).addTo(leafletMap);bounds.push(...line)}});
- if(bounds.length>1)leafletMap.fitBounds(bounds,{padding:[25,25],maxZoom:7});else leafletMap.setView([53,48],4);
- const note=document.getElementById('mapNote');if(note)note.textContent=main.length>1?'Основной маршрут нанесён по координатам точек SimBrief. Пунктир к запасным — прямое направление, если маршрут запасного не содержится в OFP.':'В OFP нет географических координат точек основного маршрута: показана прямая между аэропортами, это не навигационный маршрут.';
- requestAnimationFrame(()=>leafletMap?.invalidateSize());setTimeout(()=>leafletMap?.invalidateSize(),300);
+  if(orig)circle(orig,'map-airport',d.orig,'Аэропорт вылета',8);
+  if(dest)circle(dest,'map-airport',d.dest,'Аэропорт прибытия',8);
+  for(const a of alts)circle(a.coords,'map-airport',a.code,'Запасной аэропорт '+(a.index+1),7);
+ };
+ render();displayMap();
+ let pan=null;
+ const clientToSvg=(dx,dy)=>[dx/Math.max(1,target.clientWidth)*1000,dy/Math.max(1,target.clientHeight)*650];
+ overlay.addEventListener('pointerdown',e=>{if(e.button!==0)return;pan={x:e.clientX,y:e.clientY,lat:view.lat,lon:view.lon};overlay.setPointerCapture(e.pointerId);overlay.classList.add('dragging')});
+ overlay.addEventListener('pointermove',e=>{if(!pan)return;const [dx,dy]=clientToSvg(e.clientX-pan.x,e.clientY-pan.y);view.lon=pan.lon-dx/1000*view.spanLon;view.lat=pan.lat+dy/650*view.spanLat;render();scheduleFrame()});
+ const stopPan=()=>{pan=null;overlay.classList.remove('dragging')};overlay.addEventListener('pointerup',stopPan);overlay.addEventListener('pointercancel',stopPan);
+ overlay.addEventListener('wheel',e=>{e.preventDefault();const factor=e.deltaY>0?1.22:1/1.22;view.spanLat=Math.max(.07,Math.min(150,view.spanLat*factor));view.spanLon=Math.max(.07,Math.min(350,view.spanLon*factor));render();scheduleFrame()},{passive:false});
+ const note=document.getElementById('mapNote');if(note)note.textContent='Apple Maps как подложка; точки и маршрут нанесены по координатам SimBrief. Колесо мыши — масштаб, ЛКМ — перемещение. При недоступности Apple Maps маршрут останется видимым.';
+ const legend=document.getElementById('mapBordersNote');if(legend)legend.textContent='Apple Maps satellite · SimBrief overlay';
 }
 function updateOFPPanel(){const box=$('ofpContainer');if(!box)return;box.innerHTML=ofpMarkup();document.querySelectorAll('.ofp-tab').forEach(b=>b.onclick=()=>{ofpTab=b.dataset.tab;updateOFPPanel()});populateOFPFrame();if(ofpTab==='raw')bindOFPPageNavigation();if(ofpTab==='map')setTimeout(renderGeoMap,80);}
 function populateOFPFrame(){const frame=$('ofpFrame');if(!frame||!ofpState.data)return;const d=ofpState.data;const content=d.html||('<pre>'+esc(d.plain||'В ответе SimBrief нет форматированного OFP.')+'</pre>');frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><style>body{background:#fff;color:#111;margin:18px;font-family:Arial,sans-serif}table{max-width:100%}pre{white-space:pre-wrap}img{max-width:100%}</style></head><body>'+content+'</body></html>';}
