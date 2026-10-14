@@ -157,13 +157,27 @@ body.theme-black .mod-dialog{background:#17191d;border-color:#444b56}
 /* Profile update and startup notification */
 .profile-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}.profile-heading h1{margin:6px 0}.profile-update-btn{background:#1d304b;border:1px solid #456486;color:#f7fbff;padding:11px 15px;border-radius:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:10px}.profile-update-btn:hover{background:#2c4666}.profile-update-btn:disabled{opacity:.6;cursor:wait}.profile-update-btn span{font-size:11px;color:#a9d6fc;font-weight:500}.atlas-start-toast{position:fixed;right:22px;bottom:22px;z-index:99999;max-width:min(360px,calc(100vw - 32px));background:#fff;color:#19202a;box-shadow:0 12px 38px #0007;border:1px solid #e5e8ee;border-radius:12px;padding:13px 16px;display:flex;gap:10px;align-items:flex-start;transition:opacity .25s,transform .25s;font-family:inherit}.atlas-start-toast.is-hidden{opacity:0;transform:translateY(12px);pointer-events:none}.atlas-toast-icon{background:#e9f7ee;color:#14804b;border-radius:8px;width:32px;height:32px;display:grid;place-items:center;font-size:17px;flex-shrink:0}.atlas-toast-title{font-size:12px;font-weight:750;color:#151b25}.atlas-toast-sub{font-size:11px;color:#616d7f;margin-top:3px;line-height:1.4}@media(max-width:600px){.profile-heading{align-items:flex-start}.profile-update-btn{padding:9px;font-size:12px}.atlas-start-toast{right:12px;bottom:12px}}
 .mods-card-image.mods-image-unavailable{background:linear-gradient(135deg,#19324d,#101c2c)}.mods-card-image.mods-image-unavailable:after{content:'✈';color:#6cbcff;display:grid;place-items:center;height:100%;font-size:46px}.profile-help-link{font-size:11px;color:#8595ac;text-decoration:none;display:inline-block;margin-top:3px}.profile-help-link:hover{color:#bcdfff}
-#atlasUpdateScreen{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:#060e1ce8;backdrop-filter:blur(10px)}
-#atlasUpdateScreen.open{display:flex}
-.atlas-update-surface{width:min(440px,calc(100vw - 38px));background:linear-gradient(150deg,#182b45,#0e1727);border:1px solid #41658d;border-radius:20px;box-shadow:0 25px 100px #0009;text-align:center;padding:42px 34px 26px;color:#eff8ff}
-.atlas-update-brand{margin:0 auto 16px;background:linear-gradient(135deg,#93dcff,#367dd2);width:82px;height:82px;display:grid;place-items:center;border-radius:23px;color:#0b1b32;font-size:45px;transform:rotate(-5deg)}
-.atlas-update-name{font-size:24px;font-weight:900;letter-spacing:2px}.atlas-update-description{color:#a5bfd9;font-size:13px;margin:8px 0 32px}
-.atlas-update-track{height:8px;border-radius:99px;background:#31445d;overflow:hidden}.atlas-update-track>div{height:100%;width:0%;background:linear-gradient(90deg,#318fff,#79d5ff);transition:width .25s ease;border-radius:99px}
-.atlas-update-percentage{font-size:13px;font-weight:700;margin-top:12px}.atlas-update-dismiss{background:transparent;border:0;color:#8ca9c7;margin-top:20px;font-size:12px}
+#atlasUpdateScreen{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(3,8,17,.78);backdrop-filter:blur(12px);font-family:Inter,'Segoe UI',Arial,sans-serif}
+#atlasUpdateScreen.open{display:flex;animation:atlasScreenIn .25s ease-out}
+@keyframes atlasScreenIn{from{opacity:0}to{opacity:1}}
+.atlas-update-surface{width:min(410px,calc(100vw - 34px));box-sizing:border-box;padding:23px 28px 20px;border:1px solid #365679;border-radius:17px;background:linear-gradient(155deg,#192b42 0%,#101b2e 56%,#0e1725 100%);color:#f6fbff;box-shadow:0 22px 85px #000a;animation:atlasUpdatePop .3s ease-out}
+@keyframes atlasUpdatePop{from{transform:translateY(12px) scale(.97)}to{transform:translateY(0) scale(1)}}
+.atlas-update-topline,.atlas-update-meta,.atlas-update-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.atlas-update-topline{font-size:10px;font-weight:800;letter-spacing:1.2px;color:#b7cfe8}
+.atlas-update-topbrand{display:inline-flex;align-items:center;gap:8px}
+.atlas-update-mini{width:21px;height:21px;display:grid;place-items:center;background:#2c7bc8;border-radius:6px;color:white;font-size:14px}
+.atlas-update-version{color:#78b9ed;font-size:9px;letter-spacing:1px}
+.atlas-update-brand{display:grid;place-items:center;width:78px;height:78px;margin:28px auto 12px;border-radius:22px;background:linear-gradient(145deg,#80cffc,#3385d4);box-shadow:0 8px 35px #156bc84a}
+.atlas-update-brand span{color:#0e2d54;font-size:51px;transform:rotate(-22deg);line-height:1}
+.atlas-update-name{text-align:center;font-size:23px;font-weight:800;letter-spacing:.2px;margin:0}
+.atlas-update-description{text-align:center;font-size:12px;line-height:1.5;color:#aebed1;min-height:18px;margin:8px 0 27px}
+.atlas-update-meta{font-size:11px;color:#a6bbd4;margin:0 0 8px}.atlas-update-meta #atlasUpdatePercent{font-weight:750;color:#f2f8ff;font-variant-numeric:tabular-nums}
+.atlas-update-track{width:100%;height:8px;border-radius:20px;background:#293f58;overflow:hidden}
+.atlas-update-track>div{height:100%;width:0%;border-radius:20px;background:linear-gradient(90deg,#2685ed,#78dbfc);box-shadow:0 0 14px #319fff80;transition:width .24s ease}
+.atlas-update-bottom{border-top:1px solid #ffffff13;margin-top:24px;padding-top:15px;color:#708eae;font-size:10px}
+.atlas-update-status-dot{width:6px;height:6px;display:inline-block;border-radius:50%;background:#60c991;margin-right:5px}
+.atlas-update-dismiss{border:0;background:transparent;color:#8abfec;cursor:pointer;font-size:11px;padding:2px}.atlas-update-dismiss:hover{color:white}
+.atlas-update-dismiss[hidden]{display:none}
 /* Compact scenery download cards, matching horizontal aircraft mod layout */
 .scene-dialog{width:min(1040px,96vw)}
 .scene-pair{display:flex;flex-direction:column;gap:12px}
@@ -949,10 +963,30 @@ renderLobby();renderSidebar();refreshProfileSidebar();
 (()=>{
 const desktop=window.flightAtlasDesktop;if(!desktop)return;
 let available=false,downloaded=false,pendingVersion='',installedVersion='',toastTimer;
-const updateScreen=document.createElement('div');updateScreen.id='atlasUpdateScreen';updateScreen.innerHTML='<div class="atlas-update-surface"><div class="atlas-update-brand">✈</div><div class="atlas-update-name">FLIGHT ATLAS</div><div class="atlas-update-description" id="atlasUpdateDescription">Подготовка обновления…</div><div class="atlas-update-track"><div id="atlasUpdateProgress"></div></div><div class="atlas-update-percentage" id="atlasUpdatePercent">0%</div><button class="atlas-update-dismiss" id="atlasUpdateDismiss" type="button">Скрыть</button></div>';
-document.body.appendChild(updateScreen);updateScreen.querySelector('#atlasUpdateDismiss').onclick=()=>updateScreen.classList.remove('open');
-function progressScreen(n,label){updateScreen.classList.add('open');updateScreen.querySelector('#atlasUpdateDescription').textContent=label;updateScreen.querySelector('#atlasUpdateProgress').style.width=Math.max(0,Math.min(100,n))+'%';updateScreen.querySelector('#atlasUpdatePercent').textContent=Math.round(n)+'%';}
-
+const updateScreen=document.createElement('div');
+updateScreen.id='atlasUpdateScreen';
+updateScreen.innerHTML=`<section class="atlas-update-surface" role="dialog" aria-modal="true" aria-labelledby="atlasUpdateHeading">
+ <div class="atlas-update-topline"><span class="atlas-update-topbrand"><span class="atlas-update-mini">✈</span> FLIGHT ATLAS</span><span class="atlas-update-version" id="atlasUpdateVersion">ОБНОВЛЕНИЕ</span></div>
+ <div class="atlas-update-brand"><span>✈</span></div>
+ <h2 class="atlas-update-name" id="atlasUpdateHeading">Flight Atlas</h2>
+ <p class="atlas-update-description" id="atlasUpdateDescription">Подготовка обновления…</p>
+ <div class="atlas-update-meta"><span id="atlasUpdateStage">Загрузка файлов</span><span id="atlasUpdatePercent">0%</span></div>
+ <div class="atlas-update-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="atlasUpdateProgress"></div></div>
+ <div class="atlas-update-bottom"><span><span class="atlas-update-status-dot"></span> Защищённое обновление через GitHub</span><button class="atlas-update-dismiss" id="atlasUpdateDismiss" type="button">Свернуть</button></div>
+ </section>`;
+document.body.appendChild(updateScreen);
+updateScreen.querySelector('#atlasUpdateDismiss').onclick=()=>updateScreen.classList.remove('open');
+function progressScreen(n,label,stage='Загрузка файлов'){
+ const value=Number.isFinite(Number(n))?Math.max(0,Math.min(100,Number(n))):0;
+ updateScreen.classList.add('open');
+ updateScreen.querySelector('#atlasUpdateVersion').textContent=pendingVersion?'ВЕРСИЯ '+pendingVersion:'ОБНОВЛЕНИЕ';
+ updateScreen.querySelector('#atlasUpdateDescription').textContent=label;
+ updateScreen.querySelector('#atlasUpdateStage').textContent=stage;
+ updateScreen.querySelector('#atlasUpdateProgress').style.width=value+'%';
+ updateScreen.querySelector('#atlasUpdatePercent').textContent=Math.round(value)+'%';
+ updateScreen.querySelector('.atlas-update-track').setAttribute('aria-valuenow',String(Math.round(value)));
+ updateScreen.querySelector('#atlasUpdateDismiss').hidden=stage==='Установка';
+}
 const toast=document.createElement('div');
 toast.className='atlas-start-toast';
 toast.setAttribute('role','status');
@@ -973,7 +1007,7 @@ desktop.onUpdate(info=>{
  if(info.type==='current'){available=false;setLabel('Актуально');showToast('Установлена актуальная версия','Flight Atlas v'+(installedVersion||'—')+' · обновлений нет');}
  if(info.type==='available'){available=true;pendingVersion=info.version;setLabel('v'+info.version+' доступна');showToast('Доступно обновление v'+info.version,'Откройте личный кабинет и нажмите Update',10000);}
  if(info.type==='progress'){setLabel(Math.round(info.percent)+'%');progressScreen(info.percent,'Загрузка обновления v'+(pendingVersion||'')+'…');}
- if(info.type==='downloaded'){progressScreen(100,'Загружено. Устанавливаем и перезапускаем приложение…');downloaded=true;setLabel('Установка…');showToast('Обновление загружено','Подготавливаем установку и перезапуск…',10000);}
+ if(info.type==='downloaded'){progressScreen(100,'Загружено. Устанавливаем и перезапускаем приложение…','Установка');downloaded=true;setLabel('Установка…');showToast('Обновление загружено','Подготавливаем установку и перезапуск…',10000);}
  if(info.type==='error'){updateScreen.classList.remove('open');setLabel('Ошибка проверки');showToast('Не удалось проверить обновления','Установлена v'+(installedVersion||'—')+' · проверьте подключение к интернету',8500);}
 });
 document.addEventListener('click',async event=>{
