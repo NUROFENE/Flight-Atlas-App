@@ -757,23 +757,31 @@ async function renderGeoMap(){
  const latMin=Math.min(...points.map(p=>p[0])),latMax=Math.max(...points.map(p=>p[0])),lonMin=Math.min(...points.map(p=>p[1])),lonMax=Math.max(...points.map(p=>p[1]));
  const view={lat:(latMin+latMax)/2,lon:(lonMin+lonMax)/2,spanLat:Math.max(1.8,(latMax-latMin)*1.4),spanLon:Math.max(2.5,(lonMax-lonMin)*1.4)};
  view.spanLat=Math.min(150,view.spanLat);view.spanLon=Math.min(350,view.spanLon);
- const iframe=document.createElement('iframe');iframe.className='apple-frame';iframe.title='Google Maps — картографическая подложка';iframe.loading='eager';iframe.referrerPolicy='strict-origin-when-cross-origin';target.appendChild(iframe);
- const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');overlay.classList.add('apple-overlay');overlay.setAttribute('viewBox','0 0 1000 650');overlay.setAttribute('preserveAspectRatio','none');target.appendChild(overlay);
+ const tilesLayer=document.createElement('div');tilesLayer.style.cssText='position:absolute;inset:0;overflow:hidden;filter:brightness(.65) saturate(.85)';target.appendChild(tilesLayer);
+ const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');overlay.classList.add('apple-overlay');overlay.setAttribute('viewBox','0 0 '+Math.max(1,target.clientWidth)+' '+Math.max(1,target.clientHeight));overlay.setAttribute('preserveAspectRatio','none');target.appendChild(overlay);
  
  const popup=document.createElement('div');popup.className='apple-point-popup';popup.hidden=true;target.appendChild(popup);
  const ns='http://www.w3.org/2000/svg';
  const element=(name,attrs={})=>{const el=document.createElementNS(ns,name);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,String(v));return el};
- const coords=p=>[(p[1]-(view.lon-view.spanLon/2))/view.spanLon*1000,(view.lat+view.spanLat/2-p[0])/view.spanLat*650];
- const displayMap=()=>{
-  const params=new URLSearchParams({center:view.lat.toFixed(6)+','+view.lon.toFixed(6),span:view.spanLat.toFixed(6)+','+view.spanLon.toFixed(6),map:'satellite'});
-  const kmPerDegree=Math.max(.15,Math.cos(view.lat*Math.PI/180));
-  const neededLon=Math.max(view.spanLon,view.spanLat/kmPerDegree);
-  const zoom=Math.max(2,Math.min(17,Math.round(Math.log2(360/neededLon))));
-  iframe.src='https://maps.google.com/maps?'+new URLSearchParams({ll:view.lat.toFixed(6)+','+view.lon.toFixed(6),z:String(zoom),t:'k',output:'embed'}).toString();
+ const project=(point,z)=>{const lat=Math.max(-85,Math.min(85,point[0]))*Math.PI/180;const n=256*2**z;return [(point[1]+180)/360*n,(1-Math.log(Math.tan(lat)+1/Math.cos(lat))/Math.PI)/2*n]};
+ const unproject=(x,y,z)=>{const n=256*2**z;return [Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI,x/n*360-180]};
+ let zoom=4,tileMode='satellite',failures=0,tileCache=new Map();
+ const centerPx=()=>project([view.lat,view.lon],zoom);
+ const coords=p=>{const c=centerPx(),pt=project(p,zoom);return [pt[0]-c[0]+target.clientWidth/2,pt[1]-c[1]+target.clientHeight/2]};
+ const refreshTiles=()=>{
+  const c=centerPx(),w=target.clientWidth,h=target.clientHeight,tx=c[0]-w/2,ty=c[1]-h/2,n=2**zoom,needed=new Set();
+  for(let x=Math.floor(tx/256);x<=Math.floor((tx+w)/256);x++)for(let y=Math.floor(ty/256);y<=Math.floor((ty+h)/256);y++){
+   if(y<0||y>=n)continue;const xx=((x%n)+n)%n,key=tileMode+':'+zoom+':'+xx+':'+y;needed.add(key);
+   let im=tileCache.get(key);
+   if(!im){im=document.createElement('img');im.alt='';im.draggable=false;im.style.cssText='position:absolute;width:256px;height:256px;max-width:none;max-height:none;pointer-events:none';im.src=tileMode==='satellite'?'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'+zoom+'/'+y+'/'+xx:'https://tile.openstreetmap.org/'+zoom+'/'+xx+'/'+y+'.png';im.onerror=()=>{if(++failures>=4&&tileMode==='satellite'){tileMode='streets';failures=0;for(const node of tileCache.values())node.remove();tileCache.clear();refreshTiles()}};tilesLayer.appendChild(im);tileCache.set(key,im)}
+   im.style.left=(x*256-tx)+'px';im.style.top=(y*256-ty)+'px';
+  }
+  for(const [key,img]of tileCache)if(!needed.has(key)){img.remove();tileCache.delete(key)}
  };
+ const displayMap=()=>{refreshTiles()};
  let updateTimer=null;
- const scheduleFrame=()=>{clearTimeout(updateTimer);updateTimer=setTimeout(displayMap,250)};
- const poly=(locations,klass)=>{if(locations.length<2)return;const el=element('polyline',{points:locations.map(p=>coords(p).map(v=>v.toFixed(2)).join(',')).join(' '),class:klass});overlay.appendChild(el)};
+ const scheduleFrame=()=>{clearTimeout(updateTimer);updateTimer=setTimeout(displayMap,30)};
+  const poly=(locations,klass)=>{if(locations.length<2)return;const el=element('polyline',{points:locations.map(p=>coords(p).map(v=>v.toFixed(2)).join(',')).join(' '),class:klass});overlay.appendChild(el)};
  const showPopup=(event,html)=>{
   popup.replaceChildren();const close=document.createElement('button');close.textContent='×';close.onclick=()=>popup.hidden=true;popup.appendChild(close);
   const details=document.createElement('div');details.innerHTML=html;popup.appendChild(details);
@@ -781,25 +789,25 @@ async function renderGeoMap(){
  };
  const circle=(point,css,title,desc,rad=6)=>{const [cx,cy]=coords(point);const dot=element('circle',{cx,cy,r:rad,class:css});dot.addEventListener('click',e=>{e.stopPropagation();showPopup(e,'<strong>'+esc(title)+'</strong><div>'+desc+'</div>')});overlay.appendChild(dot);return dot};
  const render=()=>{
-  overlay.replaceChildren();popup.hidden=true;
+  overlay.setAttribute('viewBox','0 0 '+Math.max(1,target.clientWidth)+' '+Math.max(1,target.clientHeight));overlay.replaceChildren();popup.hidden=true;
   poly(mainRoute,'route-main');
   if(dest)for(const a of alts)poly([dest,a.coords],'route-alt');
-  const step=Math.max(1,Math.ceil(fixes.length/160));
+  const step=Math.max(1,Math.ceil(fixes.length/110));
   fixes.forEach((f,i)=>{if(i%step!==0&&i!==fixes.length-1)return;
    const detail='Плановая высота: '+(f.altitude?esc(f.altitude)+' ft':'нет данных')+'<div>Плановая скорость: '+(f.ias?esc(f.ias)+' KIAS':f.mach?'M '+esc(f.mach):f.tas?esc(f.tas)+' KTAS':f.groundspeed?esc(f.groundspeed)+' kt GS':'нет данных')+'</div>'+(f.airway?'<div>Airway: '+esc(f.airway)+'</div>':'');
-   circle([f.lat,f.lon],'map-fix',f.name,detail,5);
+   const label=(f.altitude?f.altitude+' ft':'—')+' / '+(f.ias?f.ias+' KIAS':f.mach?'M'+f.mach:f.tas?f.tas+' KTAS':f.groundspeed?f.groundspeed+' GS':'—');circle([f.lat,f.lon],'map-fix',f.name,detail,5);if(zoom>=6||i%4===0){const pt=coords([f.lat,f.lon]),t=element('text',{x:pt[0]+8,y:pt[1]-9,fill:'#ffffff',stroke:'#0a1929','stroke-width':3,'paint-order':'stroke','font-size':11,'font-weight':700});t.textContent=f.name+' · '+label;overlay.appendChild(t)}
   });
   if(orig)circle(orig,'map-airport',d.orig,'Аэропорт вылета',8);
   if(dest)circle(dest,'map-airport',d.dest,'Аэропорт прибытия',8);
   for(const a of alts)circle(a.coords,'map-airport',a.code,'Запасной аэропорт '+(a.index+1),7);
  };
- render();displayMap();
+ const a=project([view.lat-view.spanLat/2,view.lon-view.spanLon/2],0),b=project([view.lat+view.spanLat/2,view.lon+view.spanLon/2],0);for(let z=13;z>=2;z--){const m=2**z;if(Math.abs(b[0]-a[0])*m<target.clientWidth*.84&&Math.abs(b[1]-a[1])*m<target.clientHeight*.84){zoom=z;break}}render();displayMap();
  let pan=null;
  const clientToSvg=(dx,dy)=>[dx/Math.max(1,target.clientWidth)*1000,dy/Math.max(1,target.clientHeight)*650];
  overlay.addEventListener('pointerdown',e=>{if(e.button!==0)return;pan={x:e.clientX,y:e.clientY,lat:view.lat,lon:view.lon};overlay.setPointerCapture(e.pointerId);overlay.classList.add('dragging')});
- overlay.addEventListener('pointermove',e=>{if(!pan)return;const [dx,dy]=clientToSvg(e.clientX-pan.x,e.clientY-pan.y);view.lon=pan.lon-dx/1000*view.spanLon;view.lat=pan.lat+dy/650*view.spanLat;render();scheduleFrame()});
+ overlay.addEventListener('pointermove',e=>{if(!pan)return;const [dx,dy]=clientToSvg(e.clientX-pan.x,e.clientY-pan.y);const c=project([pan.lat,pan.lon],zoom);const p=unproject(c[0]-dx/1000*target.clientWidth,c[1]-dy/650*target.clientHeight,zoom);view.lat=p[0];view.lon=p[1];render();scheduleFrame()});
  const stopPan=()=>{pan=null;overlay.classList.remove('dragging')};overlay.addEventListener('pointerup',stopPan);overlay.addEventListener('pointercancel',stopPan);
- overlay.addEventListener('wheel',e=>{e.preventDefault();const factor=e.deltaY>0?1.22:1/1.22;view.spanLat=Math.max(.07,Math.min(150,view.spanLat*factor));view.spanLon=Math.max(.07,Math.min(350,view.spanLon*factor));render();scheduleFrame()},{passive:false});
+ overlay.addEventListener('wheel',e=>{e.preventDefault();const factor=e.deltaY>0?1.22:1/1.22;const next=Math.max(2,Math.min(16,zoom+(e.deltaY<0?1:-1)));if(next===zoom)return;const rect=overlay.getBoundingClientRect(),dx=e.clientX-rect.left-rect.width/2,dy=e.clientY-rect.top-rect.height/2,c=centerPx(),anchor=unproject(c[0]+dx,c[1]+dy,zoom);zoom=next;const n=project(anchor,zoom),result=unproject(n[0]-dx,n[1]-dy,zoom);view.lat=result[0];view.lon=result[1];render();scheduleFrame()},{passive:false});
 
 }
 function updateOFPPanel(){const box=$('ofpContainer');if(!box)return;box.innerHTML=ofpMarkup();document.querySelectorAll('.ofp-tab').forEach(b=>b.onclick=()=>{ofpTab=b.dataset.tab;updateOFPPanel()});populateOFPFrame();if(ofpTab==='raw')bindOFPPageNavigation();if(ofpTab==='map')setTimeout(renderGeoMap,80);}
