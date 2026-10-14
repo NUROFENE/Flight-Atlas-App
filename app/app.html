@@ -164,6 +164,24 @@ body.theme-black .mod-dialog{background:#17191d;border-color:#444b56}
 .atlas-update-name{font-size:24px;font-weight:900;letter-spacing:2px}.atlas-update-description{color:#a5bfd9;font-size:13px;margin:8px 0 32px}
 .atlas-update-track{height:8px;border-radius:99px;background:#31445d;overflow:hidden}.atlas-update-track>div{height:100%;width:0%;background:linear-gradient(90deg,#318fff,#79d5ff);transition:width .25s ease;border-radius:99px}
 .atlas-update-percentage{font-size:13px;font-weight:700;margin-top:12px}.atlas-update-dismiss{background:transparent;border:0;color:#8ca9c7;margin-top:20px;font-size:12px}
+/* Compact scenery download cards, matching horizontal aircraft mod layout */
+.scene-dialog{width:min(1040px,96vw)}
+.scene-pair{display:flex;flex-direction:column;gap:12px}
+.scene-card{display:grid;grid-template-columns:38% minmax(0,1fr);min-height:0;padding:10px;gap:14px;align-items:stretch;border-radius:13px}
+.scene-art{height:178px;min-height:120px;position:relative;border-radius:9px;overflow:hidden;background:linear-gradient(135deg,#193250,#0d1727)}
+.scene-art .scene-image{width:100%;height:100%;object-fit:cover;margin:0}
+.scene-art .scene-placeholder{display:grid;place-items:center;width:100%;height:100%;font-size:42px;color:#93caff}
+.scene-art [hidden]{display:none!important}
+.scene-body{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:4px 6px 4px 0}
+.scene-body h3{font-size:16px;line-height:1.3;margin:0 0 8px;overflow-wrap:anywhere}
+.scene-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.scene-tags span{font-size:11px;font-weight:700;background:#243b56;color:#c4dffa;border:1px solid #426183;border-radius:15px;padding:3px 8px}
+.scene-card .scene-category{font-size:12px;margin:0 0 11px;color:#9fb7d2;line-height:1.45}
+.scene-card .scene-future{margin:6px 0;color:#9cb2ce}
+.scene-card .scene-download-pair{margin:auto 0 0;display:flex;flex-direction:row;gap:9px;flex-wrap:wrap}
+.scene-card .scene-download{margin:0;padding:9px 13px;border:1px solid #dae3ef;background:#f5f7fb;color:#172033;border-radius:8px;font-size:12px;white-space:nowrap}
+.scene-card .scene-download:hover{background:#d8e9ff;color:#111d30}
+@media(max-width:560px){.scene-card{grid-template-columns:1fr}.scene-art{height:155px}.scene-body{padding:0 2px 4px}.scene-dialog{width:96vw}}
 </style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><style>
 #saveProfile.saved-ok,#saveProfile.saved-ok:hover{background:#168350!important;border-color:#35cc89!important;color:#fff!important;box-shadow:0 0 0 1px #2eba7a55}
 #activeView .wx-cards.wx-few{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start}
@@ -736,10 +754,17 @@ function openSceneryModal(r){
  if(!r)return;
  $('sceneTitle').textContent=r.orig===r.dest?`Сценарий ${r.orig}`:`Сценарии: ${r.orig} → ${r.dest}`;
  const airports=r.orig===r.dest?[r.orig]:[r.orig,r.dest];
- $('sceneOverlay').querySelector('.scene-pair').innerHTML=airports.map((code,i)=>{
-  const addon=MOD_CATALOG.find(m=>m.type==='scenery'&&m.airport===code);
-  const name=airport(code);
-  return `<article class="scene-card">${addon&&addon.image?`<img class="scene-image" src="${esc(addon.image)}" alt="Сценарий ${esc(code)}">`:'<div class="scene-placeholder">▧</div>'}<div class="scene-code">${esc(code)}</div><small>${esc(name)}</small>${addon?`<div class="scene-category">${esc(addon.description||'Scenery')}</div>${addon.url20||addon.url24?`<div class="scene-download-pair">${addon.url20?`<a class="scene-download" href="${esc(addon.url20)}" target="_blank" rel="noopener noreferrer">Download 2020 ↗</a>`:""}${addon.url24?`<a class="scene-download" href="${esc(addon.url24)}" target="_blank" rel="noopener noreferrer">Download 2024 ↗</a>`:""}</div>`:`<a class="scene-download" href="${esc(addon.url)}" target="_blank" rel="noopener noreferrer">Download ↗</a>`}`:'<div class="scene-future">Сценарий пока не добавлен</div>'}</article>`;
+ $('sceneOverlay').querySelector('.scene-pair').innerHTML=airports.map(code=>{
+ const addon=MOD_CATALOG.find(m=>m.type==='scenery'&&m.airport===code);
+ const name=airport(code),src=addon?.image||'';
+ const art=src?`<img class="scene-image" loading="lazy" src="${esc(src)}" alt="Аэропорт ${esc(code)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="scene-placeholder" hidden>✈</span>`:'<span class="scene-placeholder">✈</span>';
+ let urls=[];
+ if(addon?.url20||addon?.url24){
+  if(addon.url20)urls.push(['Download MSFS20',addon.url20]);
+  if(addon.url24)urls.push(['Download MSFS24',addon.url24]);
+ }else if(addon?.url)urls.push([(addon.sim?.includes('msfs20')&&addon.sim?.includes('msfs24'))?'Download MSFS20/24':addon.sim?.includes('msfs24')?'Download MSFS24':'Download MSFS20',addon.url]);
+ const tags=addon?[`<span>Scenery</span>`,...(addon.sim||[]).map(x=>`<span>${x==='msfs24'?'MSFS 2024':'MSFS 2020'}</span>`)]:[];
+ return `<article class="scene-card"><div class="scene-art">${art}</div><div class="scene-body"><h3>${esc(code)} · ${esc(name)}</h3><div class="scene-tags">${tags.join('')}</div>${addon?`<p class="scene-category">${esc(addon.description||'Airport scenery')}</p><div class="scene-download-pair">${urls.map(([label,url])=>`<a class="scene-download" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`).join('')}</div>`:'<p class="scene-future">Сценарий пока не добавлен</p>'}</div></article>`;
  }).join('');
  $('sceneOverlay').classList.add('visible');$('sceneOverlay').setAttribute('aria-hidden','false');
 }
