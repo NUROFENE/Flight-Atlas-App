@@ -6,6 +6,8 @@ const fsSync=require('node:fs');
 const {spawn}=require('node:child_process');
 const {ipcMain}=require('electron');
 const {autoUpdater}=require('electron-updater');
+const {FlightAtlasSimConnect}=require('./simconnect-bridge');
+const simBridge=new FlightAtlasSimConnect();
 const ROOT=path.join(__dirname,'app');
 const SCHEME='atlas';
 const HOST='flightatlas';
@@ -86,6 +88,7 @@ async function handle(request){try{
 function emit(type,extra={}){if(win&&!win.isDestroyed())win.webContents.send('updater:event',{type,...extra})}
 function updaterConfigured(){return app.isPackaged && process.env.FLIGHT_ATLAS_DISABLE_UPDATES!=='1'}
 function setupUpdater(){
+ ipcMain.handle('simconnect:status',()=>simBridge.snapshot());
  ipcMain.handle('weather:metar',async(_e,ids)=>{
   if(!/^[A-Z0-9]{4}(,[A-Z0-9]{4}){0,6}$/.test(ids))throw Error('Недопустимые ICAO');
   const response=await getRemote('https://aviationweather.gov/api/data/metar?ids='+encodeURIComponent(ids)+'&format=json','application/json',30);
@@ -128,5 +131,7 @@ function buildWindow(){Menu.setApplicationMenu(null);win=new BrowserWindow({widt
  win.webContents.on('will-navigate',(ev,url)=>{if(!url.startsWith('atlas://flightatlas/')){ev.preventDefault();if(/^https:\/\//i.test(url))shell.openExternal(url)}});
  win.webContents.on('render-process-gone',()=>dialog.showErrorBox('Flight Atlas','Процесс интерфейса остановился. Перезапустите приложение.'));
 }
-app.whenReady().then(()=>{protocol.handle(SCHEME,handle);setupUpdater();buildWindow();app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)buildWindow()})});
+app.whenReady().then(()=>{protocol.handle(SCHEME,handle);setupUpdater();simBridge.start();buildWindow();app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)buildWindow()})});
 app.on('window-all-closed',()=>{if(process.platform!=='darwin')app.quit()});
+
+app.on('before-quit',()=>simBridge.stop());
