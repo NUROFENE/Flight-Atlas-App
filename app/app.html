@@ -938,7 +938,7 @@ async function renderGeoMap(){
  let ownship=null;
  const render=()=>{
   refreshTiles();
-  overlay.setAttribute('viewBox','0 0 '+Math.max(1,target.clientWidth)+' '+Math.max(1,target.clientHeight));overlay.replaceChildren();popup.hidden=true;drawGrid();
+  overlay.setAttribute('viewBox','0 0 '+Math.max(1,target.clientWidth)+' '+Math.max(1,target.clientHeight));overlay.replaceChildren();drawGrid();
   poly(mainRoute,'route-main');
   if(dest)for(const a of alts)poly([dest,a.coords],'route-alt');
   const step=Math.max(1,Math.ceil(fixes.length/110));
