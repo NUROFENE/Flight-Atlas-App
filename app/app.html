@@ -1858,4 +1858,4 @@ document.addEventListener('click',async event=>{
 });
 setTimeout(async()=>{const result=await desktop.checkUpdates().catch(e=>({ok:false,error:e.message}));if(!result?.ok)showToast('Flight Atlas · v'+(installedVersion||'—'),'Не удалось проверить актуальность версии',8500);},2000);
 })();
-</script><script src="cloud.js"></script><script src="roles.js"></script></body></html>
+</script><script src="cloud.js"></script><script src="roles.js"></script><script src="window-controls.js"></script></body></html>
