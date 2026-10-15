@@ -884,13 +884,17 @@ async function renderGeoMap(){
  const element=(name,attrs={})=>{const el=document.createElementNS(ns,name);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,String(v));return el};
  const project=(point,z)=>{const lat=Math.max(-85,Math.min(85,point[0]))*Math.PI/180;const n=256*2**z;return [(point[1]+180)/360*n,(1-Math.log(Math.tan(lat)+1/Math.cos(lat))/Math.PI)/2*n]};
  const unproject=(x,y,z)=>{const n=256*2**z;return [Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI,x/n*360-180]};
- let zoom=4,tileCache=new Map(),userMoved=false;
+ let zoom=4,userMoved=false;
  const mapTilerStyle='https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/style.json?key=LMCAiFiFwekWsRsfiueA';
  let fallbackOSM=false,vectorReady=false,vectorMap=null;
  try{
    const lib=await ensureMapLibre();
+   const styleResponse=await fetch(mapTilerStyle,{cache:'no-store'});
+   if(!styleResponse.ok)throw Error('MapTiler style HTTP '+styleResponse.status);
+   const styleData=await styleResponse.json();
+   if(styleData?.version!==8)throw Error('MapTiler did not provide a valid vector style');
    if(!target.isConnected)return;
-   vectorMap=new lib.Map({container:tilesLayer,style:mapTilerStyle,center:[view.lon,view.lat],zoom:3,interactive:false,attributionControl:true,renderWorldCopies:true});
+   vectorMap=new lib.Map({container:tilesLayer,style:styleData,center:[view.lon,view.lat],zoom:3,interactive:false,attributionControl:true,renderWorldCopies:true});
    vectorFlightMap=vectorMap;
    vectorReady=true;
    vectorMap.on('error',e=>{console.warn('MapTiler map error:',e.error?.message||e);});
