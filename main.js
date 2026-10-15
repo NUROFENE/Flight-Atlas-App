@@ -108,7 +108,21 @@ async function simlinkToggle(enabled){
  if(!running)return {ok:true,running:false};
  return new Promise(resolve=>execFile('taskkill',['/IM',SIMLINK_BINARY],{windowsHide:true,timeout:8000},(err)=>resolve(err?{ok:false,error:err.message}:{ok:true,running:false})));
 }
+let oauthWindow=null;
+function startDiscordOAuth(){
+ if(oauthWindow&&!oauthWindow.isDestroyed()){oauthWindow.focus();return {ok:true}}
+ const url='https://adtvscheowcmnogysars.supabase.co/auth/v1/authorize?provider=discord&redirect_to='+encodeURIComponent('flightatlas://auth/callback');
+ oauthWindow=new BrowserWindow({width:550,height:760,minWidth:430,minHeight:550,parent:win||undefined,modal:false,show:true,title:'Flight Atlas — Discord',autoHideMenuBar:true,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true}});
+ const callback=url=>{if(!url.startsWith('flightatlas://auth/callback'))return false;win?.webContents.send('auth:discord-callback',url);if(oauthWindow&&!oauthWindow.isDestroyed())oauthWindow.close();return true};
+ oauthWindow.webContents.on('will-navigate',(event,url)=>{if(callback(url))event.preventDefault()});
+ oauthWindow.webContents.on('will-redirect',(event,url)=>{if(callback(url))event.preventDefault()});
+ oauthWindow.webContents.setWindowOpenHandler(({url})=>{if(/^https:\/\//.test(url))shell.openExternal(url);return {action:'deny'}});
+ oauthWindow.on('closed',()=>{oauthWindow=null});
+ oauthWindow.loadURL(url).catch(e=>win?.webContents.send('auth:discord-error',e.message));
+ return {ok:true};
+}
 function setupUpdater(){
+ ipcMain.handle('auth:discord-start',()=>startDiscordOAuth());
  ipcMain.handle('window:minimize',()=>{win?.minimize();return true});
  ipcMain.handle('window:toggle-maximize',()=>{if(!win)return false;win.isMaximized()?win.unmaximize():win.maximize();return win.isMaximized()});
  ipcMain.handle('window:close',()=>{win?.close();return true});
