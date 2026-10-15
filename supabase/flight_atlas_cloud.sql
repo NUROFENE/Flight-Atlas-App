@@ -16,8 +16,7 @@ end $$;
 drop trigger if exists atlas_auth_registered on auth.users;
 create trigger atlas_auth_registered after insert on auth.users for each row execute function public.atlas_new_profile();
 insert into public.atlas_profiles(id,nickname)
-select u.id, coalesce(nullif(left(p.nickname,40),''),'Пилот') from auth.users u
-left join public.profiles p on p.id=u.id
+select u.id, coalesce(nullif(left(u.raw_user_meta_data->>'nickname',40),''),'Пилот') from auth.users u
 on conflict(id) do nothing;
 create or replace function public.atlas_is_admin() returns boolean language sql stable security definer set search_path='' as $$
  select exists(select 1 from public.atlas_profiles where id=(select auth.uid()) and role='admin');
@@ -77,3 +76,14 @@ grant select,insert,update on public.atlas_flights to authenticated;
 -- BOOTSTRAP: replace the email with YOUR registered email. Run separately after signup:
 -- update public.atlas_profiles set role='admin' where id=(select id from auth.users where email='YOUR_EMAIL_HERE');
 -- Never expose a Supabase service_role key in this desktop application.
+
+-- Admin-only image upload storage
+insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
+values ('atlas-mod-images','atlas-mod-images',true,5242880,array['image/jpeg','image/png','image/webp'])
+on conflict(id) do nothing;
+drop policy if exists atlas_image_admin_insert on storage.objects;
+create policy atlas_image_admin_insert on storage.objects for insert to authenticated with check(bucket_id='atlas-mod-images' and public.atlas_is_admin());
+drop policy if exists atlas_image_admin_update on storage.objects;
+create policy atlas_image_admin_update on storage.objects for update to authenticated using(bucket_id='atlas-mod-images' and public.atlas_is_admin()) with check(bucket_id='atlas-mod-images' and public.atlas_is_admin());
+drop policy if exists atlas_image_public_read on storage.objects;
+create policy atlas_image_public_read on storage.objects for select to public using(bucket_id='atlas-mod-images');
