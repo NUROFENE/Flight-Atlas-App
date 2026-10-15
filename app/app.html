@@ -1167,7 +1167,7 @@ function recordFlightTelemetry(status){
  const p=status.position;
  if(p&&Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&Math.abs(p.lat)<=90&&Math.abs(p.lon)<=180){
   const last=t.points[t.points.length-1],sample=[Math.round(p.lat*1e6)/1e6,Math.round(p.lon*1e6)/1e6,Math.round(p.altitude||0),Math.round(p.timestamp||Date.now())];
-  if(!last||sample[3]-last[3]>=900){t.points.push(sample);if(t.points.length>30000)t.points.splice(0,500)}
+  if(!last||sample[3]-last[3]>=5000){t.points.push(sample);if(t.points.length>12000)t.points.splice(0,500)}
  }
  for(const landing of status.landings||[]){
   if(landing.timestamp>=t.startedAt&&!t.landings.some(x=>x.timestamp===landing.timestamp)&&Number.isFinite(landing.fpm))t.landings.push({lat:landing.lat,lon:landing.lon,fpm:landing.fpm,timestamp:landing.timestamp});
@@ -1182,7 +1182,7 @@ async function completeFlight(){if(!activeFlight)return;if(!confirm('Завер�
    if(value&&Number.isFinite(value.fpm)&&value.timestamp>=Number(activeFlight.startedAt||0)&&Date.now()-value.timestamp<12*3600*1000){landing={fpm:Math.round(value.fpm),timestamp:value.timestamp}}
  }catch(e){console.warn('Landing data unavailable:',e)}
  const track=trackDraft();const contacts=track?.landings||[];const lastContact=contacts[contacts.length-1];
- const entry={...activeFlight,flightTrack:track?.points||[],touchdowns:contacts,landingFpm:lastContact?.fpm??landing?.fpm??null,landingAt:lastContact?.timestamp??landing?.timestamp??null,completedAt:new Date().toISOString(),id:Date.now()+'-'+Math.random().toString(36).slice(2,6)};
+ const entry={...activeFlight,flightTrack:track?.points||[],plannedRoute:(ofpState.data?.navpoints||[]).filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])).map(p=>[p[0],p[1]]),touchdowns:contacts,landingFpm:lastContact?.fpm??landing?.fpm??null,landingAt:lastContact?.timestamp??landing?.timestamp??null,completedAt:new Date().toISOString(),id:Date.now()+'-'+Math.random().toString(36).slice(2,6)};
  localStorage.setItem(HISTORY_KEY,JSON.stringify([entry,...getHistory()].slice(0,500)));
  activeFlight=null;flightTrackDraft=null;localStorage.removeItem(TRACK_KEY);localStorage.removeItem('flightAtlasActiveV3');showActiveNav();openProfile()}
 function openProfile(){$('vatsimView').style.display='none';$('vatsimNav').classList.remove('current');$('chartsView').style.display='none';$('chartsNav').classList.remove('current');$('lobbyPage').style.display='none';$('routesPage').style.display='none';$('activeView').style.display='none';$('profileView').style.display='block';renderProfile();document.querySelector('main').scrollTop=0}
@@ -1215,6 +1215,8 @@ async function openFlightHistoryMap(index){
   map.on('load',()=>{
    if(points.length>1){map.addSource('actual-track',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:points.map(p=>[p[1],p[0]])},properties:{}}});
     map.addLayer({id:'actual-track-line',type:'line',source:'actual-track',paint:{'line-color':'#62e38f','line-width':4,'line-opacity':.9}})}
+   const planned=(record.plannedRoute||[]).filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]));
+   if(planned.length>1){map.addSource('planned-route',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:planned.map(p=>[p[1],p[0]])},properties:{}}});map.addLayer({id:'planned-route-line',type:'line',source:'planned-route',paint:{'line-color':'#ffbe4b','line-width':2,'line-dasharray':[3,3],'line-opacity':.8}})}
    const bounds=new lib.LngLatBounds();
    for(const p of points)bounds.extend([p[1],p[0]]);
    for(const p of landings)bounds.extend([p.lon,p.lat]);
