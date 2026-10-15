@@ -25,7 +25,8 @@
     for(const m of cloudMods){const i=MOD_CATALOG.findIndex(x=>x.name===(m.replaces||m.name));if(i>=0)MOD_CATALOG.splice(i,1);MOD_CATALOG.push(m)}
    }
    if(typeof records!=='undefined'){
-    if(!bundledFlights)bundledFlights=records.map(x=>({...x}));
+    if(!bundledFlights && records.length)bundledFlights=records.map(x=>({...x}));
+    if(!bundledFlights?.length){console.warn('No bundled flights loaded; cloud sync will not erase route data');return rows;}
     records.splice(0,records.length,...bundledFlights.map(x=>({...x})));
     const cloudFlights=rows.filter(x=>x.kind==='flight').map(x=>x.payload);
     for(const f of cloudFlights){
@@ -36,6 +37,7 @@
     }
        }
    if(typeof renderLobby==='function')renderLobby();
+   if(typeof render==='function' && document.getElementById('routesPage')?.style.display!=='none')render();
    return rows;
   }catch(e){console.warn('Cloud catalog unavailable, local data preserved:',e);return []}
  }
