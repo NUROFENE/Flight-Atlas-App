@@ -830,8 +830,12 @@ records=records.filter(r=>!['S7','UTAIR','Nordwind','Аэрофлот'].includes
 for(const x of (window.FLIGHT_IMPORTS||[]).filter(x=>['S7','UTAIR','Nordwind','Аэрофлот'].includes(x.airline))){
  records.push({...x,min:Number.isFinite(x.min)?x.min:autoDuration(x.orig,x.dest),types:[...new Set((x.aircraftOptions||[x.type]).filter(Boolean))]});
 }
-// Only the requested airlines are visible in the active schedule. Preserve pilot history unchanged.
-records=records.filter(r=>r.airline==='S7'||r.airline==='Аэрофлот');
+// Preserve all canonical routes. Do not remove bundled routes when imports are missing.
+// Keep a fallback for missing flight-imports.js so an offline launch cannot show zero flights.
+if(!records.length && Array.isArray(window.FLIGHT_IMPORTS)){
+ records=window.FLIGHT_IMPORTS.filter(r=>r&&r.orig&&r.dest&&r.airline).map(r=>({...r,min:Number.isFinite(r.min)?r.min:autoDuration(r.orig,r.dest)}));
+}
+if(!records.length){console.error('Flight Atlas: route database is unexpectedly empty');}
 function renderSidebar(){let counts=new Map();for(let r of records)counts.set(r.airline,(counts.get(r.airline)||0)+1);$('airlines').innerHTML=CARRIERS.map(c=>`<button class="airline ${c[0]===selected?'active':''}" data-airline="${esc(c[0])}"><span>${esc(c[0])}</span><span class="count">${counts.get(c[0])||0}</span></button>`).join('');$('airlines').querySelectorAll('button').forEach(b=>b.onclick=()=>{chooseAirline(b.dataset.airline)});$('numAirlines').textContent=CARRIERS.length}
 const AIRLINE_BASES={"Аэрофлот":["UUEE","ULLI","UNKL","URSS"],"S7":["UNNT","UUDD","UIII","UHWW"],"Победа":["UUWW","UUEE","ULLI"],"Россия":["ULLI","UUEE","UNKL","URSS"],"Уральские авиалинии":["USSS","UUDD","ULLI"],"UTAIR":["USTR","UUWW","USRR"],"Nordwind":["UUEE","ULLI","URSS"],"Smartavia":["ULAA","ULLI","UUDD"],"Red Wings":["UUDD","UWKD","USSS"],"Air Astana":["UAAA","UACC"],"Uzbekistan Airways":["UTTT"],"Якутия":["UEEE","UUDD"],"Азимут":["URRP","URMM"],"Икар":["UUEE","URSS"],"Belavia":["UMMS"],"Azerbaijan Airlines":["UBBB"],"SCAT":["UACC","UAKK"],"Centrum Air":["UTTT"],"NordStar":["UOOO","UUDD"],"Aurora":["UHWW","UHSS"],"Ямал":["USMU","USRO"],"Руслайн":["UUDD","ULLI"],"Georgian Airways":["UGTB"],"Северсталь":["ULWC"],"Alrosa":["UERR","UUDD"],"SkyUp":["UKBB"],"Ukraine International":["UKBB"],"AZUR AIR":["UUWW","UUEE","ULLI"]};
 const flightGroupsExpanded=new Set();
