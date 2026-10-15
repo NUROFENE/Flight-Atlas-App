@@ -346,7 +346,7 @@ html body #atlasUpdateConfirm>.confirm-card{position:relative!important;flex:non
 </style><style id="fa-apple-frame-overlay">
 #geoRouteMap{position:relative!important;overflow:hidden!important;background:#102136!important;min-height:560px!important}
 #geoRouteMap .apple-frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;pointer-events:none;background:#102136}
-#geoRouteMap .apple-overlay{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#geoRouteMap .apple-overlay{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}#geoRouteMap,#geoRouteMap *{user-select:none!important;-webkit-user-select:none!important}#geoRouteMap .map-fix{cursor:pointer;pointer-events:all}
 #geoRouteMap .apple-overlay.dragging{cursor:grabbing}
 #geoRouteMap .apple-map-status{position:absolute;top:12px;left:12px;z-index:5;background:#081928e0;padding:7px 11px;border-radius:8px;color:#dceafa;font-size:11px;pointer-events:none}
 #geoRouteMap .apple-point-popup{position:absolute;z-index:8;max-width:260px;background:#0c1d30f5;color:#f1f6ff;border:1px solid #4b81ac;border-radius:10px;padding:12px 14px;box-shadow:0 10px 28px #0009;font-size:12px;line-height:1.7}
@@ -923,7 +923,7 @@ async function renderGeoMap(){
   const details=document.createElement('div');details.innerHTML=html;popup.appendChild(details);
   const rect=target.getBoundingClientRect();popup.style.left=Math.max(12,Math.min(rect.width-275,event.clientX-rect.left+12))+'px';popup.style.top=Math.max(12,Math.min(rect.height-140,event.clientY-rect.top+12))+'px';popup.hidden=false;
  };
- const circle=(point,css,title,desc,rad=6)=>{const [cx,cy]=coords(point);const dot=element('circle',{cx,cy,r:rad,class:css});dot.addEventListener('click',e=>{e.stopPropagation();showPopup(e,'<strong>'+esc(title)+'</strong><div>'+desc+'</div>')});overlay.appendChild(dot);return dot};
+ const circle=(point,css,title,desc,rad=6)=>{const [cx,cy]=coords(point);const dot=element('circle',{cx,cy,r:rad,class:css,style:'pointer-events:all;cursor:pointer'});dot.addEventListener('pointerdown',e=>e.stopPropagation());dot.addEventListener('click',e=>{e.stopPropagation();showPopup(e,'<strong>'+esc(title)+'</strong><div>'+desc+'</div>')});overlay.appendChild(dot);return dot};
  const drawGrid=()=>{
  const w=target.clientWidth,h=target.clientHeight,c=centerPx();
  const tl=unproject(c[0]-w/2,c[1]-h/2,zoom),br=unproject(c[0]+w/2,c[1]+h/2,zoom);
@@ -943,7 +943,7 @@ async function renderGeoMap(){
   if(dest)for(const a of alts)poly([dest,a.coords],'route-alt');
   const step=Math.max(1,Math.ceil(fixes.length/110));
   fixes.forEach((f,i)=>{if(i%step!==0&&i!==fixes.length-1)return;
-   const detail='Плановая высота: '+(f.altitude?esc(f.altitude)+' ft':'нет данных')+'<div>Плановая скорость: '+(f.ias?esc(f.ias)+' KIAS':f.mach?'M '+esc(f.mach):f.tas?esc(f.tas)+' KTAS':f.groundspeed?esc(f.groundspeed)+' kt GS':'нет данных')+'</div>'+(f.airway?'<div>Airway: '+esc(f.airway)+'</div>':'');
+   const detail='<div>Плановая высота: '+(f.altitude?esc(f.altitude)+' ft':'нет данных')+'</div><div>Ground speed: '+(f.groundspeed?esc(f.groundspeed)+' kt GS':'нет данных в OFP')+'</div><div>Топливо на точке: '+(f.fuelRemaining?esc(f.fuelRemaining)+' (ед. OFP)':'нет данных в OFP')+'</div>'+(f.airway?'<div>Airway: '+esc(f.airway)+'</div>':'');
    circle([f.lat,f.lon],'map-fix',f.name,detail,6);
    const xy=coords([f.lat,f.lon]),tag=element('text',{x:xy[0]+9,y:xy[1]-9,fill:'#fff','font-size':12,'font-weight':700,stroke:'#0b2540','stroke-width':3,'paint-order':'stroke',style:'pointer-events:none'});tag.textContent=f.name;overlay.appendChild(tag);
   });
@@ -984,7 +984,7 @@ async function renderGeoMap(){
  },1000);
  let pan=null;
  const clientToSvg=(dx,dy)=>[dx/Math.max(1,target.clientWidth)*1000,dy/Math.max(1,target.clientHeight)*650];
- overlay.addEventListener('pointerdown',e=>{if(e.button!==0)return;pan={x:e.clientX,y:e.clientY,lat:view.lat,lon:view.lon};overlay.setPointerCapture(e.pointerId);overlay.classList.add('dragging')});
+ overlay.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest?.('.map-fix'))return;e.preventDefault();pan={x:e.clientX,y:e.clientY,lat:view.lat,lon:view.lon};overlay.setPointerCapture(e.pointerId);overlay.classList.add('dragging')});
  overlay.addEventListener('pointermove',e=>{if(!pan)return;userMoved=true;const [dx,dy]=clientToSvg(e.clientX-pan.x,e.clientY-pan.y);const c=project([pan.lat,pan.lon],zoom);const p=unproject(c[0]-dx/1000*target.clientWidth,c[1]-dy/650*target.clientHeight,zoom);view.lat=p[0];view.lon=p[1];render();scheduleFrame()});
  const stopPan=()=>{pan=null;overlay.classList.remove('dragging')};overlay.addEventListener('pointerup',stopPan);overlay.addEventListener('pointercancel',stopPan);
  let zoomAnim=0,targetZoom=zoom,zoomAnchor=null,zoomOffset=null;
@@ -1026,7 +1026,7 @@ async function loadSimbriefOFP(){
   const orig=val('origin','icao_code').toUpperCase(),dest=val('destination','icao_code').toUpperCase();
   if(!orig||!dest)throw new Error('В SimBrief ещё нет сгенерированного плана.');
   if(orig!==activeFlight.orig||dest!==activeFlight.dest)throw new Error(`Последний OFP — ${orig} → ${dest}, а выбран ${activeFlight.orig} → ${activeFlight.dest}. Сгенерируй план выбранного маршрута и нажми «Загрузить OFP».`);
-  const navfixes=[...xml.querySelectorAll('OFP > navlog > fix')].map(f=>{const get=(...names)=>{for(const n of names){const v=f.querySelector(n)?.textContent?.trim();if(v&&v!=='-')return v}return ''};return {name:get('ident')||'FIX',airway:get('via_airway'),lat:Number(get('pos_lat')),lon:Number(get('pos_long')),altitude:get('altitude_feet','altitude','altitude_plan'),ias:get('ind_airspeed','ias'),tas:get('true_airspeed','tas'),mach:get('mach'),groundspeed:get('groundspeed')}}).filter(f=>Number.isFinite(f.lat)&&Number.isFinite(f.lon)&&Math.abs(f.lat)<=90&&Math.abs(f.lon)<=180&&!(f.lat===0&&f.lon===0));
+  const navfixes=[...xml.querySelectorAll('OFP > navlog > fix')].map(f=>{const get=(...names)=>{for(const n of names){const v=f.querySelector(n)?.textContent?.trim();if(v&&v!=='-')return v}return ''};return {name:get('ident')||'FIX',airway:get('via_airway'),lat:Number(get('pos_lat')),lon:Number(get('pos_long')),altitude:get('altitude_feet','altitude','altitude_plan'),ias:get('ind_airspeed','ias'),tas:get('true_airspeed','tas'),mach:get('mach'),groundspeed:get('groundspeed','ground_speed','gs'),fuelRemaining:get('fuel_total','fuel_remaining','fuel_remain','fuel_onboard','fuel_remaining_lbs','fuel_plan')}}).filter(f=>Number.isFinite(f.lat)&&Number.isFinite(f.lon)&&Math.abs(f.lat)<=90&&Math.abs(f.lon)<=180&&!(f.lat===0&&f.lon===0));
    const navpoints=[...xml.querySelectorAll('OFP > navlog > fix')].map(f=>[Number(f.querySelector('pos_lat')?.textContent),Number(f.querySelector('pos_long')?.textContent)]).filter(([la,lo])=>Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(la)<=90&&Math.abs(lo)<=180&&!(la===0&&lo===0));
   const altNodes=[...xml.querySelectorAll('OFP > alternates > alternate, OFP > alternate')];
   const alternates=altNodes.map(n=>n.querySelector('icao_code')?.textContent?.trim()?.toUpperCase()).filter(Boolean);
