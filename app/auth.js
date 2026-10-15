@@ -2,7 +2,7 @@
 /* Supabase public (publishable) key is safe in client apps.
    Never place service_role / secret keys here. */
 (()=> {
-const URL='https://adtvscheowcmnogysars.supabase.co';
+const SUPABASE_URL='https://adtvscheowcmnogysars.supabase.co';
 const KEY='sb_publishable_Ce-WVyTNii_wFsTph8CTgA_syQx3_zg';
 const SESSION_KEY='flightatlas_supabase_session_v1';
 let session=null;
@@ -11,7 +11,7 @@ const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 async function request(path,opts={}){
  const headers={'apikey':KEY,'Content-Type':'application/json',...opts.headers};
  if(opts.auth!==false && session?.access_token)headers.Authorization='Bearer '+session.access_token;
- const response=await fetch(URL+path,{method:opts.method||'GET',headers,body:opts.data?JSON.stringify(opts.data):undefined});
+ const response=await fetch(SUPABASE_URL+path,{method:opts.method||'GET',headers,body:opts.data?JSON.stringify(opts.data):undefined});
  const body=await response.json().catch(()=>({}));
  if(!response.ok)throw Error(body.msg||body.error_description||body.message||body.error||'HTTP '+response.status);
  return body;
@@ -40,7 +40,7 @@ async function onDiscordCallback(raw){
   if(parts.get('error'))throw Error(parts.get('error_description')||parts.get('error'));
   const token=parts.get('access_token'),refresh=parts.get('refresh_token');
   if(!token||!refresh)throw Error('Discord не передал токены авторизации. Проверь Redirect URLs в Supabase.');
-  const response=await fetch(URL+'/auth/v1/user',{headers:{apikey:KEY,Authorization:'Bearer '+token}});
+  const response=await fetch(SUPABASE_URL+'/auth/v1/user',{headers:{apikey:KEY,Authorization:'Bearer '+token}});
   if(!response.ok)throw Error('Не удалось проверить аккаунт');
   const user=await response.json();
   saveSession({access_token:token,refresh_token:refresh,user,expires_at:Math.floor(Date.now()/1000)+Number(parts.get('expires_in')||3600)});
