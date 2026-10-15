@@ -646,7 +646,7 @@ const USER_ROUTE_IMPORT_20261014=[{"airline":"Аэрофлот","carrier":"AFL",
  const byKey=new Map();
  for(const r of records){const key=[r.airline,r.orig,r.dest,String(r.flight)].join('|');byKey.set(key,r);}
  for(const r of extra){
-   if(['S7','UTAIR','Nordwind'].includes(r.airline))continue;
+   if(['S7','UTAIR','Nordwind','Аэрофлот'].includes(r.airline)||r.carrier==='AFL')continue;
    const key=[r.airline,r.orig,r.dest,String(r.flight)].join('|');
    const old=byKey.get(key);
    if(old){
@@ -660,8 +660,8 @@ const USER_ROUTE_IMPORT_20261014=[{"airline":"Аэрофлот","carrier":"AFL",
 }
 // The S7 catalogue is authoritative from flight-imports.js; discard legacy in-page S7 items.
 // Fully replace S7 after all legacy imports, preserving all records from the canonical route file.
-records=records.filter(r=>!['S7','UTAIR','Nordwind'].includes(r.airline));
-for(const x of (window.FLIGHT_IMPORTS||[]).filter(x=>['S7','UTAIR','Nordwind'].includes(x.airline))){
+records=records.filter(r=>!['S7','UTAIR','Nordwind','Аэрофлот'].includes(r.airline)&&r.carrier!=='AFL');
+for(const x of (window.FLIGHT_IMPORTS||[]).filter(x=>['S7','UTAIR','Nordwind','Аэрофлот'].includes(x.airline))){
  records.push({...x,min:Number.isFinite(x.min)?x.min:autoDuration(x.orig,x.dest),types:[...new Set((x.aircraftOptions||[x.type]).filter(Boolean))]});
 }
 function renderSidebar(){let counts=new Map();for(let r of records)counts.set(r.airline,(counts.get(r.airline)||0)+1);$('airlines').innerHTML=CARRIERS.map(c=>`<button class="airline ${c[0]===selected?'active':''}" data-airline="${esc(c[0])}"><span>${esc(c[0])}</span><span class="count">${counts.get(c[0])||0}</span></button>`).join('');$('airlines').querySelectorAll('button').forEach(b=>b.onclick=()=>{chooseAirline(b.dataset.airline)});$('numAirlines').textContent=CARRIERS.length}
@@ -1304,7 +1304,7 @@ async function importUserReferenceRoutes(){
  const existing=new Set(records.map(r=>[r.airline,r.orig,r.dest,r.flight].join('|')));
  for(const line of raw.trim().split('\n')){
   const [airline,carrier,iata,orig,dest,flight,codes]=line.split('|');
-  if(!airline||!flight||!orig||!dest||['S7','UTAIR','Nordwind'].includes(airline))continue;
+  if(!airline||!flight||!orig||!dest||['S7','UTAIR','Nordwind','Аэрофлот'].includes(airline))continue;
   const key=[airline,orig,dest,flight].join('|');if(existing.has(key))continue;existing.add(key);
   const aircraftOptions=codes.split(',').filter(Boolean);
   records.push({airline,carrier,iata,orig,dest,flight,type:aircraftOptions[0]||'UNKN',aircraftOptions,min:autoDuration(orig,dest),status:'reference',source:'Пользовательский справочник · расписание не проверено'});
