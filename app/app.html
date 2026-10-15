@@ -1161,7 +1161,7 @@ function syncWeatherVisibility(){
  cards.style.setProperty('display',active?'grid':'none','important');
 }
 function updateOFPPanel(){const box=$('ofpContainer');if(!box)return;box.innerHTML=ofpMarkup();document.querySelectorAll('.ofp-tab').forEach(b=>b.onclick=()=>{ofpTab=b.dataset.tab;updateOFPPanel()});populateOFPFrame();if(ofpTab==='raw')bindOFPPageNavigation();if(ofpTab==='map')setTimeout(renderGeoMap,80);syncWeatherVisibility();}
-function populateOFPFrame(){const frame=$('ofpFrame');if(!frame||!ofpState.data)return;const d=ofpState.data;const content=d.html||('<pre>'+esc(d.plain||'В ответе SimBrief нет форматированного OFP.')+'</pre>');frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><style>body{background:#fff;color:#111;margin:18px;font-family:Arial,sans-serif}table{max-width:100%}pre{white-space:pre-wrap}img{max-width:100%}</style></head><body>'+content+'<script>for(const [id,method] of [["faMinimize","minimizeWindow"],["faMaximize","toggleMaximizeWindow"],["faClose","closeWindow"]]){document.getElementById(id)?.addEventListener("click",()=>window.flightAtlasDesktop?.[method]?.())}</script><script src="cloud.js"></script></body></html>';}
+function populateOFPFrame(){const frame=$('ofpFrame');if(!frame||!ofpState.data)return;const d=ofpState.data;const content=d.html||('<pre>'+esc(d.plain||'В ответе SimBrief нет форматированного OFP.')+'</pre>');frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><style>body{background:#fff;color:#111;margin:18px;font-family:Arial,sans-serif}table{max-width:100%}pre{white-space:pre-wrap}img{max-width:100%}</style></head><body>'+content+'<script>for(const [id,method] of [["faMinimize","minimizeWindow"],["faMaximize","toggleMaximizeWindow"],["faClose","closeWindow"]]){document.getElementById(id)?.addEventListener("click",()=>window.flightAtlasDesktop?.[method]?.())}</script></body></html>';}
 async function loadSimbriefOFP(){
  if(!activeFlight)return;
  const profile=getProfile(),id=String(profile.simbriefId||'').trim();
@@ -1838,4 +1838,4 @@ document.addEventListener('click',async event=>{
 });
 setTimeout(async()=>{const result=await desktop.checkUpdates().catch(e=>({ok:false,error:e.message}));if(!result?.ok)showToast('Flight Atlas · v'+(installedVersion||'—'),'Не удалось проверить актуальность версии',8500);},2000);
 })();
-</script></body></html>
+</script><script src="cloud.js"></script></body></html>
