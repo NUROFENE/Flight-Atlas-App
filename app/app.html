@@ -935,6 +935,7 @@ async function renderGeoMap(){
  for(let lon=Math.ceil(tl[1]/step)*step;lon<=br[1];lon+=step){const x=coords([view.lat,lon])[0];line({x1:x,x2:x,y1:0,y2:h});label(Math.max(8,Math.min(w-62,x+4)),13,lon,'lon')}
  overlay.appendChild(grid);
  };
+ let ownship=null;
  const render=()=>{
   refreshTiles();
   overlay.setAttribute('viewBox','0 0 '+Math.max(1,target.clientWidth)+' '+Math.max(1,target.clientHeight));overlay.replaceChildren();popup.hidden=true;drawGrid();
@@ -946,6 +947,14 @@ async function renderGeoMap(){
    circle([f.lat,f.lon],'map-fix',f.name,detail,6);
    const xy=coords([f.lat,f.lon]),tag=element('text',{x:xy[0]+9,y:xy[1]-9,fill:'#fff','font-size':12,'font-weight':700,stroke:'#0b2540','stroke-width':3,'paint-order':'stroke',style:'pointer-events:none'});tag.textContent=f.name;overlay.appendChild(tag);
   });
+  if(ownship&&Number.isFinite(ownship.lat)&&Number.isFinite(ownship.lon)){
+   const [sx,sy]=coords([ownship.lat,ownship.lon]);
+   const aircraft=element('g',{transform:'translate('+sx+' '+sy+') rotate('+ownship.heading+')'});
+   aircraft.appendChild(element('path',{d:'M0 -19 L5 -4 L17 5 L17 9 L4 5 L4 16 L9 19 L9 22 L0 19 L-9 22 L-9 19 L-4 16 L-4 5 L-17 9 L-17 5 L-5 -4 Z',fill:'#fff',stroke:'#034d7c','stroke-width':2}));
+   overlay.appendChild(aircraft);
+   const tag=element('text',{x:sx+19,y:sy-13,fill:'#fff','font-size':12,'font-weight':700,stroke:'#0c2942','stroke-width':3,'paint-order':'stroke'});
+   tag.textContent='YOU · '+Math.round(ownship.altitude)+' ft · '+Math.round(ownship.groundSpeed)+' kt';overlay.appendChild(tag);
+  }
   if(orig)circle(orig,'map-airport',d.orig,'Аэропорт вылета',8);
   if(dest)circle(dest,'map-airport',d.dest,'Аэропорт прибытия',8);
   for(const a of alts)circle(a.coords,'map-airport',a.code,'Запасной аэропорт '+(a.index+1),7);
@@ -962,6 +971,17 @@ async function renderGeoMap(){
  let lastWidth=target.clientWidth,lastHeight=target.clientHeight;
  flightMapResizeObserver=new ResizeObserver(()=>{if(!target.isConnected)return;const w=target.clientWidth,h=target.clientHeight;if(w<1||h<1||(w===lastWidth&&h===lastHeight))return;lastWidth=w;lastHeight=h;fitZoom();render()});
  flightMapResizeObserver.observe(target);
+ const simStatus=document.createElement('div');simStatus.style.cssText='position:absolute;left:12px;bottom:12px;z-index:8;color:#e9f4ff;background:#0b1c32db;border:1px solid #426b8d;border-radius:7px;padding:5px 9px;font:12px Segoe UI,sans-serif;pointer-events:none';simStatus.textContent='SimConnect: ожидание MSFS';target.appendChild(simStatus);
+ let simPolling=false;
+ const simTimer=setInterval(async()=>{
+   if(!target.isConnected){clearInterval(simTimer);return}
+   if(simPolling||!window.flightAtlasDesktop?.simconnect)return;
+   simPolling=true;
+   try{const data=await window.flightAtlasDesktop.simconnect();if(!target.isConnected)return;
+    simStatus.textContent=data.position?'● MSFS подключён · '+Math.round(data.position.ias)+' KIAS':'○ SimConnect: '+(data.state==='connected'?'ожидание позиции':'ожидание MSFS');
+    ownship=data.position||null;render();
+   }catch(e){simStatus.textContent='SimConnect недоступен'}finally{simPolling=false}
+ },1000);
  let pan=null;
  const clientToSvg=(dx,dy)=>[dx/Math.max(1,target.clientWidth)*1000,dy/Math.max(1,target.clientHeight)*650];
  overlay.addEventListener('pointerdown',e=>{if(e.button!==0)return;pan={x:e.clientX,y:e.clientY,lat:view.lat,lon:view.lon};overlay.setPointerCapture(e.pointerId);overlay.classList.add('dragging')});
