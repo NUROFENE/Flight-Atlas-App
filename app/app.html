@@ -954,7 +954,7 @@ async function renderGeoMap(){
  const showPopup=(event,html,anchor)=>{
   popup.replaceChildren();const close=document.createElement('button');close.textContent='×';close.onclick=()=>popup.hidden=true;popup.appendChild(close);
   const details=document.createElement('div');details.innerHTML=html;popup.appendChild(details);
-  const rect=target.getBoundingClientRect();const point=anchor||[event.clientX-rect.left,event.clientY-rect.top];popup.style.left=Math.max(10,Math.min(Math.max(10,rect.width-popup.offsetWidth-12),point[0]+12))+'px';popup.style.top=Math.max(10,Math.min(Math.max(10,rect.height-popup.offsetHeight-12),point[1]+12))+'px';popup.hidden=false;
+  const rect=target.getBoundingClientRect();popup.hidden=false;const point=anchor||[event.clientX-rect.left,event.clientY-rect.top];popup.style.left=Math.max(10,Math.min(Math.max(10,rect.width-popup.offsetWidth-12),point[0]+12))+'px';popup.style.top=Math.max(10,Math.min(Math.max(10,rect.height-popup.offsetHeight-12),point[1]+12))+'px';popup.hidden=false;
  };
  const circle=(point,css,title,desc,rad=6)=>{const [cx,cy]=coords(point);const dot=element('circle',{cx,cy,r:rad,class:css,style:'pointer-events:all;cursor:pointer'});dot.addEventListener('pointerdown',e=>e.stopPropagation());dot.addEventListener('click',e=>{e.stopPropagation();showPopup(e,'<strong>'+esc(title)+'</strong><div>'+desc+'</div>',coords(point))});overlay.appendChild(dot);return dot};
  const drawGrid=()=>{
