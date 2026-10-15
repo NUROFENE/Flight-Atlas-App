@@ -1176,7 +1176,7 @@ function recordFlightTelemetry(status){
 }
 setInterval(async()=>{if(!activeFlight||flightTrackBusy||!window.flightAtlasDesktop?.simconnect)return;flightTrackBusy=true;try{recordFlightTelemetry(await window.flightAtlasDesktop.simconnect())}catch(e){}finally{flightTrackBusy=false}},1000);
 
-async async function completeFlight(){if(!activeFlight)return;if(!confirm('Завершить выбранный рейс и сохранить его в истории?'))return;
+async function completeFlight(){if(!activeFlight)return;if(!confirm('Завершить выбранный рейс и сохранить его в истории?'))return;
  let landing=null;
  try{const status=await window.flightAtlasDesktop?.simconnect?.();const value=status?.landing;
    if(value&&Number.isFinite(value.fpm)&&value.timestamp>=Number(activeFlight.startedAt||0)&&Date.now()-value.timestamp<12*3600*1000){landing={fpm:Math.round(value.fpm),timestamp:value.timestamp}}
