@@ -1,6 +1,7 @@
 'use strict';
 // Flight Atlas automatic local MSFS 2020/2024 SimConnect client.
-const {open,Protocol,SimConnectDataType,SimConnectPeriod,SimConnectConstants}=require('node-simconnect');
+// Lazy-loading also supports ESM-only releases of node-simconnect.
+let simconnectModule=null;
 const DEF=2711,REQUEST=2712;
 class FlightAtlasSimConnect{
  constructor(){this.handle=null;this.timer=null;this.connecting=false;this.stopped=false;this.last=null;this.state='waiting';this.simulator='';this.error='';this.lastAt=0;}
@@ -11,6 +12,8 @@ class FlightAtlasSimConnect{
    if(this.stopped||this.connecting||this.handle)return;
    this.connecting=true;this.state='connecting';
    try{
+    if(!simconnectModule)simconnectModule=await import('node-simconnect');
+    const {open,Protocol,SimConnectDataType,SimConnectPeriod,SimConnectConstants}=simconnectModule;
     const {handle,recvOpen}=await open('Flight Atlas',Protocol.FSX_SP2);
     if(this.stopped){try{handle.close()}catch(_){};return}
     this.handle=handle;this.state='connected';this.simulator=String(recvOpen?.applicationName||'MSFS');this.error='';this.lastAt=0;
