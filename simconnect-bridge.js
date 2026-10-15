@@ -24,7 +24,7 @@ class FlightAtlasSimConnect{
       try{const buf=packet.data,vals=data.map(()=>buf.readFloat64());if(!vals.every(Number.isFinite)||Math.abs(vals[0])>90||Math.abs(vals[1])>180)return;
        const onGround=vals[7]>=.5,verticalFpm=vals[6],now=Date.now();
        if(!onGround)this.airborne=true;
-       if(onGround&&this.airborne&&this.last?.onGround===false&&now-this.lastTouchdownAt>15000){
+       if(onGround&&this.airborne&&this.last?.onGround===false&&now-this.lastTouchdownAt>1200){
          const fpm=Math.round(this.priorVerticalFpm??verticalFpm);
          if(Number.isFinite(fpm)){this.landing={fpm:Math.min(0,fpm),timestamp:now,lat:vals[0],lon:vals[1]};this.lastTouchdownAt=now;this.landings.push(this.landing);if(this.landings.length>100)this.landings.shift()}
          this.airborne=false;
