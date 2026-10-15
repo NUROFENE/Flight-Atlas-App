@@ -347,7 +347,7 @@ body.theme-black main:has(#routesPage[style*="display: block"]){background:linea
 #activeView .ofp-pages-sidebar{position:sticky!important;top:10px!important;height:min(78dvh,850px)!important;max-height:calc(100dvh - 30px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;align-self:start;z-index:7;scrollbar-width:thin}
 #activeView .ofp-pages-sidebar .ofp-page-thumb{flex-shrink:0}
 @media(max-width:1050px){#activeView .ofp-raw-layout{grid-template-columns:minmax(0,1fr) 105px!important}#activeView .ofp-raw-page pre{font-size:9px!important}}
-</style><style id="fa-modal-fix">
+\n.maplibregl-popup.flight-touchdown-popup .maplibregl-popup-content{background:rgba(6,14,21,.87)!important;color:#fff!important;border:1px solid rgba(255,255,255,.24);border-radius:8px;box-shadow:0 8px 22px #0008;padding:12px 16px}.maplibregl-popup.flight-touchdown-popup .maplibregl-popup-tip{border-top-color:rgba(6,14,21,.87)!important;border-bottom-color:rgba(6,14,21,.87)!important}.maplibregl-popup.flight-touchdown-popup .maplibregl-popup-close-button{color:#fff;font-size:18px}\n</style><style id="fa-modal-fix">
 html body #atlasUpdateConfirm{position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100dvh!important;z-index:2147483000!important;box-sizing:border-box!important;margin:0!important;padding:24px!important;background:rgba(3,9,19,.58)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;align-items:center!important;justify-content:center!important;overflow:auto!important;transform:none!important}
 html body #atlasUpdateConfirm:not(.open){display:none!important}
 html body #atlasUpdateConfirm.open{display:flex!important}
@@ -1175,7 +1175,7 @@ function recordFlightTelemetry(status){
 }
 setInterval(async()=>{if(!activeFlight||flightTrackBusy||!window.flightAtlasDesktop?.simconnect)return;flightTrackBusy=true;try{recordFlightTelemetry(await window.flightAtlasDesktop.simconnect())}catch(e){}finally{flightTrackBusy=false}},1000);
 
-async function completeFlight(){if(!activeFlight)return;if(!confirm('Завершить выбранный рейс и сохранить его в истории?'))return;
+async async function completeFlight(){if(!activeFlight)return;if(!confirm('Завершить выбранный рейс и сохранить его в истории?'))return;
  let landing=null;
  try{const status=await window.flightAtlasDesktop?.simconnect?.();const value=status?.landing;
    if(value&&Number.isFinite(value.fpm)&&value.timestamp>=Number(activeFlight.startedAt||0)&&Date.now()-value.timestamp<12*3600*1000){landing={fpm:Math.round(value.fpm),timestamp:value.timestamp}}
@@ -1222,7 +1222,7 @@ async function openFlightHistoryMap(index){
    if(!bounds.isEmpty())map.fitBounds(bounds,{padding:65,maxZoom:13,duration:550});
    landings.forEach((p,i)=>{
     const node=document.createElement('button');node.textContent='✈';node.title='Касание '+(i+1)+' · '+p.fpm+' FPM';node.style.cssText='border:2px solid #fff;border-radius:100%;width:34px;height:34px;background:#8e42d9;color:white;box-shadow:0 2px 8px #0009;cursor:pointer';
-    const pop=new lib.Popup({offset:20}).setHTML('<strong>Касание '+(i+1)+'</strong><div>'+esc(p.fpm)+' FPM</div><div>'+new Date(p.timestamp).toLocaleTimeString('ru-RU')+'</div>');
+    const pop=new lib.Popup({offset:20,className:'flight-touchdown-popup'}).setHTML('<div style="color:#fff;font:13px/1.55 Segoe UI,Arial,sans-serif"><strong style="color:#fff">Landing '+(i+1)+'</strong><div style="color:#fff">'+esc(p.fpm)+' FPM</div><div style="color:#fff">'+new Date(p.timestamp).toLocaleTimeString('ru-RU')+'</div></div>');
     new lib.Marker({element:node}).setLngLat([p.lon,p.lat]).setPopup(pop).addTo(map);
    });
   });
