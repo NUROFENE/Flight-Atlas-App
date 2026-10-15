@@ -1,7 +1,7 @@
 {
   "name": "flight-atlas",
   "productName": "Flight Atlas",
-  "version": "6.0.42",
+  "version": "6.0.43",
   "description": "Flight Atlas flight planning and simulator companion",
   "main": "main.js",
   "author": "Flight Atlas",
@@ -12,7 +12,8 @@
     "dist": "electron-builder --win nsis --x64 --publish always"
   },
   "dependencies": {
-    "electron-updater": "^6.6.2"
+    "electron-updater": "^6.6.2",
+    "node-simconnect": "^4.2.1"
   },
   "devDependencies": {
     "electron": "^37.3.1",
@@ -24,6 +25,7 @@
     "asar": true,
     "files": [
       "main.js",
+      "simconnect-bridge.js",
       "preload.js",
       "app/**/*",
       "package.json"
