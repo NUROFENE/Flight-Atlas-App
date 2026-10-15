@@ -45,7 +45,7 @@
   root.innerHTML='<div class="profile-card" style="margin-top:14px;padding:20px"><div class="profile-overline">FLIGHT ATLAS ID</div><h2>'+h(me.nickname)+' · FA-'+String(me.pilot_number).padStart(6,'0')+'</h2><p class="profile-note">Роль: '+h(me.role)+'</p>'+(me.role==='admin'?'<button class="btn primary" id="openAtlasAdmin">Открыть админ-панель</button>':'')+'</div>';
   const button=document.getElementById('openAtlasAdmin');if(button)button.onclick=()=>showAdmin();
  }
- async function decorateProfile(){await profile();initPanel()}
+ async function decorateProfile(){await profile();const root=document.getElementById('atlasCloudArea');const grid=document.querySelector('#profileView .profile-grid');if(root&&grid)grid.before(root);initPanel()}
  function editorHTML(item){
   const p=item?.payload||{};return '<form id="atlasAdminForm" style="display:grid;gap:10px">'+
    '<input type="hidden" name="id" value="'+h(item?.id||'')+'"><input type="hidden" name="replaces" value="'+h(JSON.stringify(item?.payload?.replaces||item?._replaces||''))+'">'+
