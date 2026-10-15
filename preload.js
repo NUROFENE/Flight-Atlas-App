@@ -1,6 +1,9 @@
 const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('flightAtlasDesktop',Object.freeze({
   version:()=>ipcRenderer.invoke('app:version'),
+  startDiscordLogin:()=>ipcRenderer.invoke('auth:discord-start'),
+  onDiscordCallback:fn=>{const listener=(_e,url)=>fn(url);ipcRenderer.on('auth:discord-callback',listener);return()=>ipcRenderer.removeListener('auth:discord-callback',listener)},
+  onDiscordError:fn=>{const listener=(_e,message)=>fn(message);ipcRenderer.on('auth:discord-error',listener);return()=>ipcRenderer.removeListener('auth:discord-error',listener)},
   minimizeWindow:()=>ipcRenderer.invoke('window:minimize'),
   toggleMaximizeWindow:()=>ipcRenderer.invoke('window:toggle-maximize'),
   closeWindow:()=>ipcRenderer.invoke('window:close'),
