@@ -397,23 +397,6 @@ html body #atlasUpdateConfirm>.confirm-card{position:relative!important;flex:non
 @media(max-width:780px){#sceneOverlay .scene-pair:has(>.scene-card:nth-child(2)){grid-template-columns:1fr!important}#sceneOverlay .scene-card,#sceneOverlay .scene-pair:has(>.scene-card:nth-child(2)) .scene-card{width:min(720px,calc(100vw - 100px))!important}}
 @media(max-width:520px){#sceneOverlay .scene-card{grid-template-columns:1fr!important}#sceneOverlay .scene-art,#sceneOverlay .scene-image{height:180px!important;min-height:180px!important}}
 
-/* Light theme — solid surfaces, dark readable text, no blur */
-body.theme-light{color-scheme:light!important;--bg:#f3f6fb;--panel:#ffffff;--panel2:#f1f5fb;--border:#d6e0eb;--muted:#52657b;--text:#17283b;--accent:#2769cb;background:#edf2f8!important;color:#18293c!important}
-body.theme-light aside{background:#fff!important;color:#18304d!important;border-color:#d6e0eb!important;box-shadow:none!important}
-body.theme-light main{background:#f3f6fb!important;color:#18293c!important}
-body.theme-light .profile-card,body.theme-light .carrier-tile,body.theme-light .mods-panel,body.theme-light .wx-card,body.theme-light .simbrief-ofp-card,body.theme-light .stat,body.theme-light .tablewrap,body.theme-light .modal,body.theme-light .pilot-sidebar-card,body.theme-light .ofp-tab,body.theme-light .alt-route-row{background:#fff!important;border:1px solid #d5dfec!important;color:#18293c!important;box-shadow:0 3px 14px #213c5910!important;backdrop-filter:none!important}
-body.theme-light .profile-heading h1,body.theme-light .profile-card h2,body.theme-light .mods-panel h2,body.theme-light .carrier-tile strong,body.theme-light h1,body.theme-light h2,body.theme-light h3{color:#14283f!important}
-body.theme-light .profile-note,body.theme-light .profile-overline,body.theme-light .eyebrow,body.theme-light .profile-card label,body.theme-light .history-row small{color:#536982!important}
-body.theme-light button:not(.primary):not(.confirm-yes),body.theme-light .home-btn,body.theme-light .theme-switch button,body.theme-light .airline{background:#f6f9fd!important;border-color:#cddbed!important;color:#17365b!important;box-shadow:none!important}
-body.theme-light button:hover,body.theme-light .airline:hover{background:#e8f1fc!important}
-body.theme-light .theme-switch .chosen,body.theme-light .airline.active{background:#dbeafa!important;border-color:#6fa2e5!important;color:#164b95!important}
-body.theme-light input,body.theme-light select,body.theme-light textarea{background:#fff!important;color:#18293c!important;border-color:#b8cadf!important}
-body.theme-light a{color:#1763c2}
-body.theme-light .profile-update-btn.update-available{background:#edbe36!important;color:#271b00!important;border-color:#d8a328!important;box-shadow:0 0 16px #e2b33366!important}
-body.theme-light .profile-update-btn.update-available span{color:#271b00!important}
-body.theme-light .leader-pilot-btn{background:#f2f7fd!important;color:#18344f!important;border-color:#c6d7ea!important}
-.atlas-auth-panel{margin-top:18px}.atlas-auth-panel h2{margin:7px 0 8px}.atlas-auth-form{display:grid;grid-template-columns:1fr;max-width:480px;gap:6px}.atlas-auth-form input{background:#0b1627;color:#fff;border:1px solid #385070;border-radius:9px;padding:10px;width:100%;box-sizing:border-box}.atlas-auth-actions{display:flex;gap:10px;margin-top:10px}.atlas-auth-panel .profile-note{margin:10px 0 0}
-
 /* Responsive OFP: scroll the document rather than the whole application. */
 #activeView .simbrief-ofp-card:has(.ofp-raw-layout){width:100%!important;max-width:100%!important;min-width:0!important;max-height:none!important;overflow:hidden!important}
 #activeView .ofp-raw-layout{display:grid!important;grid-template-columns:minmax(0,1fr) clamp(104px,11vw,150px)!important;gap:12px;min-width:0;width:100%;height:min(74vh,850px);min-height:350px;overflow:hidden;align-items:stretch}
@@ -422,6 +405,11 @@ body.theme-light .leader-pilot-btn{background:#f2f7fd!important;color:#18344f!im
 #activeView .ofp-raw-page pre{overflow-x:auto!important;max-width:100%;font-size:clamp(9px,.76vw,12px)!important}
 #activeView .ofp-pages-sidebar{height:100%!important;min-height:0;overflow-y:auto!important;overflow-x:hidden!important;position:relative!important;top:0!important;overscroll-behavior:contain}
 @media(max-width:750px){#activeView .ofp-raw-layout{grid-template-columns:minmax(0,1fr) 92px!important;height:70vh}#activeView .ofp-raw-page{padding:8px}}
+
+/* Leaderboard formatting — do not inherit browser button style */
+#monthlyLeaderboardRows .leader-pilot-btn{display:grid!important;grid-template-columns:45px minmax(120px,1fr) repeat(3,minmax(65px,auto)) auto!important;align-items:center!important;gap:14px!important;width:100%!important;padding:14px 18px!important;background:#1a2b43!important;border:1px solid #426284!important;border-radius:12px!important;color:#e9f4ff!important;text-align:left!important;white-space:normal!important}
+#monthlyLeaderboardRows .leader-pilot-btn:hover{background:#253c59!important}#monthlyLeaderboardRows .leader-metric{white-space:nowrap;color:#c6daf1}#monthlyLeaderboardRows .leader-details{color:#8bc9ff;white-space:nowrap}#monthlyLeaderboardRows .leader-pilot-name{min-width:0;overflow-wrap:anywhere}
+@media(max-width:850px){#monthlyLeaderboardRows .leader-pilot-btn{grid-template-columns:38px minmax(100px,1fr) auto!important}#monthlyLeaderboardRows .leader-metric{grid-column:2}#monthlyLeaderboardRows .leader-details{grid-column:3;grid-row:1}}
 </style><style id="fa-metar-card-uniform">
 /* All METAR cards follow the same UNNT-sized grid cell, independent of content. */
 .wx-cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows: minmax(565px,auto)!important;align-items:stretch!important;gap:16px!important}
@@ -951,12 +939,14 @@ async function renderGeoMap(){
  let updateTimer=null;
  const scheduleFrame=()=>{clearTimeout(updateTimer);updateTimer=setTimeout(displayMap,30)};
   const poly=(locations,klass)=>{if(locations.length<2)return;const el=element('polyline',{points:locations.map(p=>coords(p).map(v=>v.toFixed(2)).join(',')).join(' '),class:klass});overlay.appendChild(el)};
- const showPopup=(event,html,anchor)=>{
+ let popupAnchor=null;
+ const repositionPopup=()=>{if(popup.hidden||!popupAnchor)return;const point=coords(popupAnchor),rect=target.getBoundingClientRect();if(point[0]<-20||point[1]<-20||point[0]>rect.width+20||point[1]>rect.height+20){popup.hidden=true;return}popup.style.left=Math.max(10,Math.min(Math.max(10,rect.width-popup.offsetWidth-12),point[0]+12))+'px';popup.style.top=Math.max(10,Math.min(Math.max(10,rect.height-popup.offsetHeight-12),point[1]+12))+'px'};
+ const showPopup=(event,html,anchor)=>{popupAnchor=anchor?anchor.slice():null;
   popup.replaceChildren();const close=document.createElement('button');close.textContent='×';close.onclick=()=>popup.hidden=true;popup.appendChild(close);
   const details=document.createElement('div');details.innerHTML=html;popup.appendChild(details);
-  const rect=target.getBoundingClientRect();popup.hidden=false;const point=anchor||[event.clientX-rect.left,event.clientY-rect.top];popup.style.left=Math.max(10,Math.min(Math.max(10,rect.width-popup.offsetWidth-12),point[0]+12))+'px';popup.style.top=Math.max(10,Math.min(Math.max(10,rect.height-popup.offsetHeight-12),point[1]+12))+'px';popup.hidden=false;
+  const rect=target.getBoundingClientRect();popup.hidden=false;const point=anchor?coords(anchor):[event.clientX-rect.left,event.clientY-rect.top];popup.style.left=Math.max(10,Math.min(Math.max(10,rect.width-popup.offsetWidth-12),point[0]+12))+'px';popup.style.top=Math.max(10,Math.min(Math.max(10,rect.height-popup.offsetHeight-12),point[1]+12))+'px';popup.hidden=false;
  };
- const circle=(point,css,title,desc,rad=6)=>{const [cx,cy]=coords(point);const dot=element('circle',{cx,cy,r:rad,class:css,style:'pointer-events:all;cursor:pointer'});dot.addEventListener('pointerdown',e=>e.stopPropagation());dot.addEventListener('click',e=>{e.stopPropagation();showPopup(e,'<strong>'+esc(title)+'</strong><div>'+desc+'</div>',coords(point))});overlay.appendChild(dot);return dot};
+ const circle=(point,css,title,desc,rad=6)=>{const [cx,cy]=coords(point);const dot=element('circle',{cx,cy,r:rad,class:css,style:'pointer-events:all;cursor:pointer'});dot.addEventListener('pointerdown',e=>e.stopPropagation());dot.addEventListener('click',e=>{e.stopPropagation();showPopup(e,'<strong>'+esc(title)+'</strong><div>'+desc+'</div>',point)});overlay.appendChild(dot);return dot};
  const drawGrid=()=>{
  const w=target.clientWidth,h=target.clientHeight,c=centerPx();
  const tl=unproject(c[0]-w/2,c[1]-h/2,zoom),br=unproject(c[0]+w/2,c[1]+h/2,zoom);
@@ -991,6 +981,7 @@ async function renderGeoMap(){
   if(orig)circle(orig,'map-airport',d.orig,'Аэропорт вылета',8);
   if(dest)circle(dest,'map-airport',d.dest,'Аэропорт прибытия',8);
   for(const a of alts)circle(a.coords,'map-airport',a.code,'Запасной аэропорт '+(a.index+1),7);
+  repositionPopup();
   // Styled map tiles already include labels.
   labelsLayer.replaceChildren();
   if(importedMapChart?.center){
@@ -1089,16 +1080,23 @@ async function loadSimbriefOFP(){
    plain=textNode?.textContent?.trim()||'';
   }
   // Parse LIDO flight-log EFOB (e.g. SODLE ... 5.3 0.9) when navlog fuel tags are missing.
+  // SimBrief LIDO FLIGHT LOG: EFOB/AFOB appear in the row above the FIX ident/coordinates.
   const fuelByIdent=new Map();
   if(plain){
-   const log=plain.match(/FLIGHT LOG([\s\S]*?)(?:NOT FOR REAL WORLD NAVIGATION|\f|ATC FLIGHT PLAN|ALTERNATE ROUTE|END OF FLIGHT LOG|$)/i)?.[1]||'';
-   for(const line of log.split('\n')){
-    const words=line.trim().split(/\s+/);if(words.length<3)continue;
-    const ident=words[0].toUpperCase();
-    if(!/^[A-Z][A-Z0-9]{2,7}$/.test(ident))continue;
-    const fuel=words.slice(-2);
-    if(/^\d{1,3}\.\d$/.test(fuel[0])&&/^\d{1,3}\.\d$/.test(fuel[1]))fuelByIdent.set(ident,fuel[0]);
-   }
+    const lines=plain.replace(/\r/g,'').split('\n');
+    let active=false,previous=null;
+    for(const line of lines){
+      if(/FLIGHT\s+LOG/i.test(line)){active=true;previous=null;continue}
+      if(!active)continue;
+      if(/NOT FOR REAL WORLD NAVIGATION|ATC FLIGHT PLAN|ALTERNATE ROUTE/i.test(line)){active=false;continue}
+      const match=line.match(/^\s*([A-Z0-9]{3,8})\s+.*?\s+(\d{1,3}\.\d)\s+(\d{1,3}\.\d)\s*$/);
+      if(match&& !/^SUNUN|AWY|IDENT|FREQ|FLIGHT|POSITION$/.test(match[1])){
+        fuelByIdent.set(match[1],match[2]);
+        if(previous)fuelByIdent.set(previous,match[2]);
+      }
+      const row=line.match(/^\s*([A-Z][A-Z0-9]{2,7})\s+[NS]\d{3,}/);
+      if(row)previous=row[1];
+    }
   }
   for(const fix of navfixes){if(!fix.fuelRemaining&&fuelByIdent.has(fix.name.toUpperCase()))fix.fuelRemaining=fuelByIdent.get(fix.name.toUpperCase())+' t'}
   const d={orig,dest,flight:val('general','icao_airline')+val('general','flight_number'),aircraft:val('aircraft','icao_code'),fl:String(Math.round(Number(val('general','initial_altitude'))/100)||''),layout:val('params','ofp_layout'),route:val('general','route'),fuel:val('fuel','plan_ramp')||val('fuel','plan_takeoff'),units:val('params','units'),alternate:val('alternate','icao_code'),costIndex:val('general','costindex'),enroute:val('times','est_time_enroute'),zfw:val('weights','est_zfw'),tow:val('weights','est_tow'),law:val('weights','est_ldw'),payload:val('weights','payload'),pax:val('weights','pax_count'),tripFuel:val('fuel','enroute_burn'),reserveFuel:val('fuel','reserve'),navpoints,navfixes,alternates,originCoords,destinationCoords,alternateRoutes,html,plain};
@@ -1290,9 +1288,9 @@ function getModsPrefs(){try{return {...{visible:true,sim:'all',type:'all'},...JS
 function setModsPrefs(patch){localStorage.setItem(MODS_KEY,JSON.stringify({...getModsPrefs(),...patch}));renderProfile()}
 function drawMods(){const container=$('modsResults');if(!container)return;const prefs=getModsPrefs();const matches=MOD_CATALOG.filter(m=>{const sims=Array.isArray(m.sim)?m.sim:[m.sim];const matchSim=prefs.sim==='all'||(prefs.sim==='msfsboth'?sims.includes('msfs24')&&sims.includes('msfs20'):sims.includes(prefs.sim));return matchSim&&(prefs.type==='all'||(prefs.type==='a320neo'?m.neoCategory===true:m.type===prefs.type))});container.innerHTML=matches.length?`<div class="mods-grid">${matches.map(m=>`<article class="mods-card" role="button" tabindex="0" data-mod-index="${MOD_CATALOG.indexOf(m)}" data-mod-aircraft="${esc(m.aircraft||'')}" data-mod-airport="${esc(m.airport||'')}" title="Открыть карточку мода"><div class="mods-card-image">${m.image?`<img src="${esc(m.image)}" alt="" onerror="this.hidden=true;this.parentElement.classList.add('mods-image-unavailable')">`:`<div class="mods-fallback">${esc((Array.isArray(m.aircraftCodes)?m.aircraftCodes[0]:m.aircraft)||m.airport||'MOD')}</div>`}</div><div class="mods-card-body"><div class="mods-card-name">${esc(m.name)}</div><div class="mods-card-meta">${esc(m.description||'')}</div></div></article>`).join('')}</div>`:`<div class="mods-empty"><strong>Моды пока не добавлены</strong>${selectedAircraftMod?`Выбран тип ВС: ${esc(selectedAircraftMod)}. Пока для него нет добавленных модов.`:'Здесь будут отображаться карточки дополнений после наполнения каталога.'}</div>`;container.querySelectorAll('[data-mod-index]').forEach(el=>{el.addEventListener('click',()=>{const idx=Number(el.dataset.modIndex),mod=MOD_CATALOG[idx];if(!mod)return;el.dataset.modAirport?openSceneryModal({orig:el.dataset.modAirport,dest:el.dataset.modAirport}):openModDialog([mod],mod.name)});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const idx=Number(el.dataset.modIndex),mod=MOD_CATALOG[idx];if(!mod)return;el.dataset.modAirport?openSceneryModal({orig:el.dataset.modAirport,dest:el.dataset.modAirport}):openModDialog([mod],mod.name)}})})}
 const THEME_KEY='flightatlas_theme';
-function getTheme(){return localStorage.getItem(THEME_KEY)==='light'?'light':'blue'}
-function setTheme(t){localStorage.setItem(THEME_KEY,t==='light'?'light':'blue');applyTheme();renderProfile()}
-function applyTheme(){const t=getTheme();document.body.classList.remove('theme-black');document.body.classList.toggle('theme-light',t==='light');document.body.classList.remove('theme-custom')}
+function getTheme(){return localStorage.getItem(THEME_KEY)==='black'?'black':'blue'}
+function setTheme(t){localStorage.setItem(THEME_KEY,t==='black'?'black':'blue');applyTheme();renderProfile()}
+function applyTheme(){const t=getTheme();document.body.classList.toggle('theme-black',t==='black');document.body.classList.remove('theme-light','theme-custom','theme-glass')}
 applyTheme();
 let selectedAircraftMod='';
 function modMatchesAircraft(mod,code){const target=String(code||'').trim().toUpperCase();const codes=(Array.isArray(mod.aircraftCodes)?mod.aircraftCodes:[mod.aircraft]).filter(Boolean).map(v=>String(v).trim().toUpperCase());return codes.includes(target)||(target==='A320NEO'&&mod.neoCategory===true)}
@@ -1330,7 +1328,7 @@ function historyHours(rows){let minutes=0;for(const f of rows){const start=Date.
 function renderMonthlyLeaderboard(){
  const node=document.getElementById('monthlyLeaderboardRows');if(!node)return;const flights=monthlyFlights(),pilot=getProfile(),name=pilot.nick||'Мой пилот';
  const landings=flights.map(f=>Number(f.landingFpm)).filter((x,i)=>flights[i].landingFpm!=null&&Number.isFinite(x));
- node.innerHTML='<button type="button" class="leader-pilot-btn" id="leaderOpenPilot"><span class="leader-rank">01</span><span class="leader-pilot-name">'+esc(name)+'</span><span>'+flights.length+' рейсов</span><span>'+historyHours(flights).toFixed(1)+' ч</span><span>'+ (landings.length?Math.round(landings.reduce((a,b)=>a+b,0)/landings.length)+' FPM':'FPM —')+'</span><span>Подробнее ↗</span></button>';
+ node.innerHTML='<button type="button" class="leader-pilot-btn" id="leaderOpenPilot"><span class="leader-rank">01</span><span class="leader-pilot-name">'+esc(name)+'</span><span class="leader-metric">'+flights.length+' рейсов</span><span class="leader-metric">'+historyHours(flights).toFixed(1)+' ч</span><span class="leader-metric">'+(landings.length?Math.round(landings.reduce((a,b)=>a+b,0)/landings.length)+' FPM':'FPM —')+'</span><span class="leader-details">Подробнее ↗</span></button>';
  node.querySelector('#leaderOpenPilot').onclick=()=>showPilotLeaderboardProfile();
 }
 function showPilotLeaderboardProfile(){
@@ -1354,13 +1352,13 @@ function showPilotLeaderboardProfile(){
 }
 
 function renderProfile(){const pr=getProfile(),history=getHistory().map((item,index)=>({...item,_originalIndex:index})).sort((a,b)=>Date.parse(b.completedAt||0)-Date.parse(a.completedAt||0));const prefs=getModsPrefs();const modsVisible=prefs.visible,modsSim=prefs.sim,modsType=prefs.type;refreshProfileSidebar();
- $('profileView').innerHTML=`<div class="profile-shell"><div class="profile-heading"><div><div class="eyebrow">FLIGHT ATLAS / PILOT PROFILE</div><h1>Личный кабинет</h1></div><button type="button" id="atlasUpdate" class="profile-update-btn">↻ Update <span id="atlasUpdateBadge">Проверить</span></button></div><a class="profile-discord" href="https://discord.gg/pd37mbsCud" target="_blank" rel="noopener">Поддержка в Discord ↗</a><section id="atlasAuthPanel" class="profile-card atlas-auth-panel"></section><div class="profile-grid"><div class="profile-card"><div id="avatarFrame" class="profile-avatar" title="Нажми, чтобы сменить аватар">${pr.avatar?`<img alt="Аватар" src="${pr.avatar}" style="height:100%;width:100%;object-fit:cover;border-radius:50%">`:'✈'}</div><div class="avatar-change-hint">Нажми на аватарку для смены</div><input class="avatar-upload" id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp"><label>Никнейм</label><input id="profileNick" maxlength="40" value="${esc(pr.nick||'')}" placeholder="Имя пилота"><label>SimBrief ID</label><input id="profileSimbrief" maxlength="48" value="${esc(pr.simbriefId||'')}" placeholder="Числовой Pilot ID"><label>Тема интерфейса</label><div class="theme-switch"><button type="button" id="themeBlue" class="${getTheme()==='light'?'chosen':''}">Светлая</button><button type="button" id="themeBlack" class="${getTheme()==='blue'?'chosen':''}">Синяя</button></div><div class="profile-cta"><button class="btn primary" id="saveProfile">Сохранить профиль</button></div><p class="profile-note">Данные хранятся только на этом компьютере в локальном хранилище приложения. SimBrief ID передаётся в SimBrief при открытии планирования.</p></div><div class="profile-card"><div class="profile-overline">ИСТОРИЯ ПОЛЁТОВ</div><h2>${history.length} выполнено</h2>${history.length?history.map((h,i)=>`<div class="history-row"><div><strong>${esc(h.airline||'')}${esc(h.number||'')} · ${esc(h.orig)} → ${esc(h.dest)}</strong><br><small>${esc(h.type||'')} · ${new Date(h.completedAt).toLocaleString('ru-RU')}</small></div><div class="history-actions"><span style="color:#65d6ac">✓ Выполнен${Number.isFinite(h.landingFpm)?' · Посадка '+esc(h.landingFpm)+' FPM':' · FPM не записан'}</span><button type="button" class="btn history-map" data-flight-map="${h._originalIndex}">На карте ↗</button><button type="button" class="btn history-delete" data-flight-index="${h._originalIndex}" title="Удалить рейс из истории">Удалить</button></div></div>`).join(''):'<div class="history-empty">Пока нет выполненных рейсов. Выбери маршрут, подтверди его и нажми «Завершить полёт» в разделе активного полёта.</div>'}</div></div><section class="monthly-leaderboard profile-card" id="monthlyLeaderboard"><div class="profile-overline">FLIGHT ATLAS / PILOTS</div><h2>Лидерборд месяца</h2><p class="profile-note">Локальный рейтинг: пока отображаются только ваши завершённые полёты. Для общего рейтинга игроков требуется сервер синхронизации.</p><div id="monthlyLeaderboardRows"></div></section><section class="mods-panel" id="modsSection"><div class="mods-header"><div><div class="profile-overline">FLIGHT ATLAS / ADD-ONS</div><h2>Моды</h2><div class="profile-note" style="margin-top:0">Каталог дополнений для авиасимуляторов</div></div><button class="btn" type="button" id="modsToggle">${modsVisible?'Скрыть моды':'Показать моды'}</button></div><div id="modsContent" style="display:${modsVisible?'block':'none'}"><div class="mods-filter-row"><span class="mods-filter-label">Simulator</span><div class="mods-pills" id="modsSimFilters">${modsSimOptions.map(o=>`<button class="mods-pill ${modsSim===o.id?'chosen':''}" type="button" data-mod-sim="${o.id}">${o.label}</button>`).join('')}</div></div><div class="mods-filter-row"><span class="mods-filter-label">Type</span><div class="mods-pills" id="modsTypeFilters">${modsTypeOptions.map(o=>`<button class="mods-pill ${modsType===o.id?'chosen':''}" type="button" data-mod-type="${o.id}">${o.label}</button>`).join('')}</div></div><div id="modsResults"></div></div></section></div>`;
+ $('profileView').innerHTML=`<div class="profile-shell"><div class="profile-heading"><div><div class="eyebrow">FLIGHT ATLAS / PILOT PROFILE</div><h1>Личный кабинет</h1></div><button type="button" id="atlasUpdate" class="profile-update-btn">↻ Update <span id="atlasUpdateBadge">Проверить</span></button></div><a class="profile-discord" href="https://discord.gg/pd37mbsCud" target="_blank" rel="noopener">Поддержка в Discord ↗</a><section id="atlasAuthPanel" class="profile-card atlas-auth-panel"></section><div class="profile-grid"><div class="profile-card"><div id="avatarFrame" class="profile-avatar" title="Нажми, чтобы сменить аватар">${pr.avatar?`<img alt="Аватар" src="${pr.avatar}" style="height:100%;width:100%;object-fit:cover;border-radius:50%">`:'✈'}</div><div class="avatar-change-hint">Нажми на аватарку для смены</div><input class="avatar-upload" id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp"><label>Никнейм</label><input id="profileNick" maxlength="40" value="${esc(pr.nick||'')}" placeholder="Имя пилота"><label>SimBrief ID</label><input id="profileSimbrief" maxlength="48" value="${esc(pr.simbriefId||'')}" placeholder="Числовой Pilot ID"><label>Тема интерфейса</label><div class="theme-switch"><button type="button" id="themeBlue" class="${getTheme()==='blue'?'chosen':''}">Синяя</button><button type="button" id="themeBlack" class="${getTheme()==='black'?'chosen':''}">Тёмная</button></div><div class="profile-cta"><button class="btn primary" id="saveProfile">Сохранить профиль</button></div><p class="profile-note">Данные хранятся только на этом компьютере в локальном хранилище приложения. SimBrief ID передаётся в SimBrief при открытии планирования.</p></div><div class="profile-card"><div class="profile-overline">ИСТОРИЯ ПОЛЁТОВ</div><h2>${history.length} выполнено</h2>${history.length?history.map((h,i)=>`<div class="history-row"><div><strong>${esc(h.airline||'')}${esc(h.number||'')} · ${esc(h.orig)} → ${esc(h.dest)}</strong><br><small>${esc(h.type||'')} · ${new Date(h.completedAt).toLocaleString('ru-RU')}</small></div><div class="history-actions"><span style="color:#65d6ac">✓ Выполнен${Number.isFinite(h.landingFpm)?' · Посадка '+esc(h.landingFpm)+' FPM':' · FPM не записан'}</span><button type="button" class="btn history-map" data-flight-map="${h._originalIndex}">На карте ↗</button><button type="button" class="btn history-delete" data-flight-index="${h._originalIndex}" title="Удалить рейс из истории">Удалить</button></div></div>`).join(''):'<div class="history-empty">Пока нет выполненных рейсов. Выбери маршрут, подтверди его и нажми «Завершить полёт» в разделе активного полёта.</div>'}</div></div><section class="monthly-leaderboard profile-card" id="monthlyLeaderboard"><div class="profile-overline">FLIGHT ATLAS / PILOTS</div><h2>Лидерборд месяца</h2><p class="profile-note">Локальный рейтинг: пока отображаются только ваши завершённые полёты. Для общего рейтинга игроков требуется сервер синхронизации.</p><div id="monthlyLeaderboardRows"></div></section><section class="mods-panel" id="modsSection"><div class="mods-header"><div><div class="profile-overline">FLIGHT ATLAS / ADD-ONS</div><h2>Моды</h2><div class="profile-note" style="margin-top:0">Каталог дополнений для авиасимуляторов</div></div><button class="btn" type="button" id="modsToggle">${modsVisible?'Скрыть моды':'Показать моды'}</button></div><div id="modsContent" style="display:${modsVisible?'block':'none'}"><div class="mods-filter-row"><span class="mods-filter-label">Simulator</span><div class="mods-pills" id="modsSimFilters">${modsSimOptions.map(o=>`<button class="mods-pill ${modsSim===o.id?'chosen':''}" type="button" data-mod-sim="${o.id}">${o.label}</button>`).join('')}</div></div><div class="mods-filter-row"><span class="mods-filter-label">Type</span><div class="mods-pills" id="modsTypeFilters">${modsTypeOptions.map(o=>`<button class="mods-pill ${modsType===o.id?'chosen':''}" type="button" data-mod-type="${o.id}">${o.label}</button>`).join('')}</div></div><div id="modsResults"></div></div></section></div>`;
 
  $('modsToggle').onclick=()=>setModsPrefs({visible:!getModsPrefs().visible});
  $('profileView').querySelectorAll('[data-mod-sim]').forEach(b=>b.onclick=()=>setModsPrefs({sim:b.dataset.modSim}));
  $('profileView').querySelectorAll('[data-mod-type]').forEach(b=>b.onclick=()=>setModsPrefs({type:b.dataset.modType}));
  drawMods();renderMonthlyLeaderboard();window.FlightAtlasAuth?.mount();
- $('themeBlue').onclick=()=>setTheme('light');$('themeBlack').onclick=()=>setTheme('blue');$('saveProfile').onclick=saveProfile;$('avatarInput').onchange=e=>setAvatar(e.target.files[0]);$('avatarFrame').onclick=()=>$('avatarInput').click();
+ $('themeBlue').onclick=()=>setTheme('blue');$('themeBlack').onclick=()=>setTheme('black');$('saveProfile').onclick=saveProfile;$('avatarInput').onchange=e=>setAvatar(e.target.files[0]);$('avatarFrame').onclick=()=>$('avatarInput').click();
  $('profileView').querySelectorAll('.history-map').forEach(button=>{button.onclick=()=>openFlightHistoryMap(Number(button.dataset.flightMap))});
  $('profileView').querySelectorAll('.history-delete').forEach(button=>{button.onclick=()=>{
   const idx=Number(button.dataset.flightIndex);const saved=getHistory();
