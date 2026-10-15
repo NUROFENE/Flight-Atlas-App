@@ -87,3 +87,19 @@ drop policy if exists atlas_image_admin_update on storage.objects;
 create policy atlas_image_admin_update on storage.objects for update to authenticated using(bucket_id='atlas-mod-images' and public.atlas_is_admin()) with check(bucket_id='atlas-mod-images' and public.atlas_is_admin());
 drop policy if exists atlas_image_public_read on storage.objects;
 create policy atlas_image_public_read on storage.objects for select to public using(bucket_id='atlas-mod-images');
+
+-- Admin-only role assignment via public Flight Atlas ID.
+create or replace function public.atlas_set_role(target_pilot_number bigint, target_role text)
+returns boolean language plpgsql security definer set search_path='' as $$
+declare target_id uuid;
+begin
+ if not public.atlas_is_admin() then raise exception 'Administrator required' using errcode='42501'; end if;
+ if target_role not in ('user','admin') then raise exception 'Invalid role'; end if;
+ select id into target_id from public.atlas_profiles where pilot_number=target_pilot_number;
+ if target_id is null then raise exception 'Pilot ID not found'; end if;
+ if target_id=(select auth.uid()) and target_role='user' then raise exception 'Cannot demote yourself'; end if;
+ update public.atlas_profiles set role=target_role where id=target_id;
+ return true;
+end $$;
+revoke all on function public.atlas_set_role(bigint,text) from public;
+grant execute on function public.atlas_set_role(bigint,text) to authenticated;
