@@ -410,6 +410,12 @@ html body #atlasUpdateConfirm>.confirm-card{position:relative!important;flex:non
 #monthlyLeaderboardRows .leader-pilot-btn{display:grid!important;grid-template-columns:45px minmax(120px,1fr) repeat(3,minmax(65px,auto)) auto!important;align-items:center!important;gap:14px!important;width:100%!important;padding:14px 18px!important;background:#1a2b43!important;border:1px solid #426284!important;border-radius:12px!important;color:#e9f4ff!important;text-align:left!important;white-space:normal!important}
 #monthlyLeaderboardRows .leader-pilot-btn:hover{background:#253c59!important}#monthlyLeaderboardRows .leader-metric{white-space:nowrap;color:#c6daf1}#monthlyLeaderboardRows .leader-details{color:#8bc9ff;white-space:nowrap}#monthlyLeaderboardRows .leader-pilot-name{min-width:0;overflow-wrap:anywhere}
 @media(max-width:850px){#monthlyLeaderboardRows .leader-pilot-btn{grid-template-columns:38px minmax(100px,1fr) auto!important}#monthlyLeaderboardRows .leader-metric{grid-column:2}#monthlyLeaderboardRows .leader-details{grid-column:3;grid-row:1}}
+
+/* RAW OFP: fixed-width monospaced page, scrollable document pane and stable thumbnails */
+#activeView .ofp-raw-pages{display:block!important;overflow-y:auto!important;overflow-x:auto!important;scrollbar-gutter:stable;min-width:0;}
+#activeView .ofp-raw-page{display:block!important;width:100%!important;min-height:680px!important;height:auto!important;margin:0 0 14px!important;padding:24px 20px!important;box-sizing:border-box!important;background:#fff!important;color:#172030!important;}
+#activeView .ofp-raw-page pre{display:block!important;white-space:pre!important;overflow-x:auto!important;overflow-y:visible!important;line-height:1.5!important;font:12px/1.5 Consolas,'Courier New',monospace!important;min-height:600px!important;max-width:100%!important;}
+#activeView .ofp-pages-sidebar{height:100%!important;overflow-y:auto!important;align-self:stretch!important;}
 </style><style id="fa-metar-card-uniform">
 /* All METAR cards follow the same UNNT-sized grid cell, independent of content. */
 .wx-cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows: minmax(565px,auto)!important;align-items:stretch!important;gap:16px!important}
@@ -827,16 +833,21 @@ function ofpMarkup(){
 // Build navigation thumbnails for the original SimBrief text OFP.
 // Honour form-feed page breaks when supplied; otherwise paginate by line count.
 function splitOFPIntoPages(raw){
+ // SimBrief text can contain form feeds on every visual row. Those are NOT page
+ // separators. Only trust them when the chunks are large enough to be pages.
  const input=String(raw||'').replace(/\r\n?/g,'\n');
- const existing=input.split('\f');
- if(existing.length>1)return existing.map(t=>t.replace(/^\n+|\n+$/g,'')).filter(Boolean);
- const lines=input.split('\n');
- const pages=[];let buffer=[];
+ const parts=input.split('\f').map(p=>p.trimEnd()).filter(p=>p.trim());
+ const substantial=parts.length>1 && parts.filter(p=>p.split('\n').length>=20).length>=Math.ceil(parts.length*.7);
+ if(substantial)return parts.map(p=>p.replace(/^\n+/,''));
+ // Remove bogus form feeds while retaining line breaks before paginating.
+ const lines=input.replace(/\f/g,'\n').split('\n');
+ const pages=[];let batch=[];
  for(const line of lines){
-  if(buffer.length>=58){pages.push(buffer.join('\n'));buffer=[]}
-  buffer.push(line);
+  // Avoid blank-only pages and keep the original monospaced text layout.
+  batch.push(line);
+  if(batch.length>=58){pages.push(batch.join('\n'));batch=[]}
  }
- if(buffer.length)pages.push(buffer.join('\n'));
+ if(batch.some(line=>line.trim()))pages.push(batch.join('\n'));
  return pages.length?pages:[''];
 }
 function ofpPaginatedMarkup(raw){
