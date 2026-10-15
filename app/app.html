@@ -1576,18 +1576,23 @@ function renderUpdateStatus(){
 }
 window.flightAtlasCheckOnProfileOpen=async function(){renderUpdateStatus();if(checkingNow)return;checkingNow=true;setLabel('Проверка…');try{const result=await desktop.checkUpdates();if(!result?.ok)setLabel('Ошибка проверки')}catch(e){setLabel('Ошибка проверки')}finally{checkingNow=false;renderUpdateStatus()}};
 
-const fallbackChanges=['Список изменений не опубликован.'];
-function presentNotes(value){
+const fallbackChanges=['Описание обновления не опубликовано разработчиком.'];
+const CHANGELOG_BY_VERSION={
+ '6.0.57':['Новый стиль Liquid Glass вместо синей темы: прозрачные панели, размытие и мягкие блики','Удалена кастомная палитра цветов','Добавлена карточка лидерборда месяца в личном кабинете (пока локальная статистика)','Профиль пилота: выполненные рейсы, часы по доступным данным, средний FPM','Карта-паутина маршрутов по истории полётов'],
+ '6.0.56':['Удалена ссылка «Поддержка» возле заголовка личного кабинета и лишняя подпись','Список изменений перенесён в окно Update','Добавлена автоматическая проверка обновлений при открытии профиля'],
+ '6.0.55':['Заменён каталог S7: 90 маршрутовых записей с позывными SBI','Добавлена категория модов A320neo с FlyByWire и Fenix','Кнопка Update выделяется жёлтым при доступной новой версии']
+};
+function presentNotes(value,version){
  const list=confirmScreen.querySelector('#faConfirmChanges');list.replaceChildren();
- let notes=typeof value==='string'?value:Array.isArray(value)?value.map(x=>x?.note||'').join('\n'):'';
+ let notes=typeof value==='string'?value:Array.isArray(value)?value.map(x=>typeof x==='string'?x:(x?.note||'')).join('\n'):'';
  notes=notes.replace(/<[^>]+>/g,' ').replace(/\r/g,'').trim();
- let lines=notes.split('\n').map(x=>x.replace(/^[-*•#\s]+/,'').trim()).filter(Boolean).slice(0,8);
- if(!lines.length)lines=fallbackChanges;
- for(const line of lines){const li=document.createElement('li');li.textContent=line.slice(0,220);list.appendChild(li);}
+ let lines=notes.split('\n').map(x=>x.replace(/^[-*•#\s]+/,'').trim()).filter(Boolean).filter(x=>!/^flight atlas\s*v?\d+\.\d+\.\d+$/i.test(x)&&!/^v?\d+\.\d+\.\d+$/.test(x)).slice(0,12);
+ if(!lines.length)lines=CHANGELOG_BY_VERSION[String(version||'').replace(/^v/,'')]||fallbackChanges;
+ for(const line of lines){const li=document.createElement('li');li.textContent=line.slice(0,290);list.appendChild(li);}
 }
 function showUpdateConfirmation(){
  confirmScreen.querySelector('#faConfirmVersion').textContent='ВЕРСИЯ '+(pendingVersion||'—');
- presentNotes(available?releaseNotes:currentChanges.join('\n'));confirmScreen.classList.add('open');
+ presentNotes(available?releaseNotes:currentChanges.join('\n'),pendingVersion||installedVersion);confirmScreen.classList.add('open');
  confirmScreen.querySelector('#faUpdateNo').focus();
 }
 confirmScreen.querySelector('#faUpdateNo').onclick=()=>confirmScreen.classList.remove('open');
