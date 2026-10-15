@@ -4,7 +4,7 @@
  const A=()=>window.FlightAtlasAuth;
  const api=(path,opts)=>A().request(path,opts);
  const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- let me=null,content=[],initialModsLoaded=false,initialFlightsLoaded=false;
+ let me=null,content=[];let bundledMods=null,bundledFlights=null;
  const status=(s)=>{const el=document.getElementById('atlasAdminStatus');if(el)el.textContent=s};
  async function profile(){
   if(!A()||!await A().ensureSession()){me=null;return null}
@@ -18,22 +18,23 @@
    const rows=await api('/rest/v1/atlas_content?select=id,kind,payload,published,updated_at&published=eq.true&order=updated_at.asc',{auth:false});
    content=rows;
    if(typeof MOD_CATALOG!=='undefined'){
+    if(!bundledMods)bundledMods=MOD_CATALOG.map(x=>({...x}));
+    MOD_CATALOG.splice(0,MOD_CATALOG.length,...bundledMods.map(x=>({...x})));
     const cloudMods=rows.filter(x=>x.kind==='mod').map(x=>({...x.payload,_cloudId:x.id}));
     // All existing bundled mods remain; cloud items are additive or override by name.
-    if(!initialModsLoaded){
-     for(const m of cloudMods){const i=MOD_CATALOG.findIndex(x=>x.name===m.name);if(i>=0)MOD_CATALOG.splice(i,1);MOD_CATALOG.push(m)}
-     initialModsLoaded=true;
-    }
+    for(const m of cloudMods){const i=MOD_CATALOG.findIndex(x=>x.name===(m.replaces||m.name));if(i>=0)MOD_CATALOG.splice(i,1);MOD_CATALOG.push(m)}
    }
-   if(typeof records!=='undefined'&&!initialFlightsLoaded){
+   if(typeof records!=='undefined'){
+    if(!bundledFlights)bundledFlights=records.map(x=>({...x}));
+    records.splice(0,records.length,...bundledFlights.map(x=>({...x})));
     const cloudFlights=rows.filter(x=>x.kind==='flight').map(x=>x.payload);
     for(const f of cloudFlights){
-     const ix=records.findIndex(r=>r.airline===f.airline&&r.orig===f.orig&&r.dest===f.dest&&r.flight===f.flight);
+     const old=f.replaces||{airline:f.airline,orig:f.orig,dest:f.dest,flight:f.flight};
+     const ix=records.findIndex(r=>r.airline===old.airline&&r.orig===old.orig&&r.dest===old.dest&&r.flight===old.flight);
      if(ix>=0)records.splice(ix,1);
      records.push({...f,status:'admin',source:'Flight Atlas Cloud'});
     }
-    initialFlightsLoaded=true;
-   }
+       }
    if(typeof renderLobby==='function')renderLobby();
    return rows;
   }catch(e){console.warn('Cloud catalog unavailable, local data preserved:',e);return []}
@@ -47,7 +48,7 @@
  async function decorateProfile(){await profile();initPanel()}
  function editorHTML(item){
   const p=item?.payload||{};return '<form id="atlasAdminForm" style="display:grid;gap:10px">'+
-   '<input type="hidden" name="id" value="'+h(item?.id||'')+'">'+
+   '<input type="hidden" name="id" value="'+h(item?.id||'')+'"><input type="hidden" name="replaces" value="'+h(JSON.stringify(item?.payload?.replaces||item?._replaces||''))+'">'+
    '<label>Тип записи <select name="kind"><option value="mod" '+(item?.kind!=='flight'?'selected':'')+'>Мод</option><option value="flight" '+(item?.kind==='flight'?'selected':'')+'>Рейс</option></select></label>'+
    '<label>Название мода / Авиакомпания <input name="name" required maxlength="120" value="'+h(p.name||p.airline||'')+'"></label>'+
    '<label>Описание <input name="description" maxlength="500" value="'+h(p.description||'')+'"></label>'+
@@ -98,6 +99,8 @@
   document.body.appendChild(overlay);
   overlay.querySelector('#closeAtlasAdmin').onclick=()=>overlay.remove();
   overlay.querySelector('#atlasNewRecord').onclick=()=>openEditor(null);
+  overlay.querySelector('#atlasExistingMod').onclick=()=>pickBundled('mod');
+  overlay.querySelector('#atlasExistingFlight').onclick=()=>pickBundled('flight');
   await refreshAdmin();
  }
  async function refreshAdmin(){
@@ -109,6 +112,15 @@
    status('Записей: '+rows.length);
   }catch(e){status('Ошибка базы: '+e.message)}
  }
+ function pickBundled(kind){
+  const list=kind==='mod'?(bundledMods||MOD_CATALOG):(bundledFlights||records);
+  const root=document.getElementById('atlasAdminEditor');if(!root)return;
+  const pick=document.createElement('select');pick.style.cssText='width:100%;padding:12px;background:#172439;color:#fff';
+  const hint=document.createElement('p');hint.textContent='Выбери встроенную запись для редактирования';root.replaceChildren(hint,pick);
+  const blank=document.createElement('option');blank.value='';blank.textContent='Выбери…';pick.append(blank);
+  list.forEach((item,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=kind==='mod'?item.name:item.airline+' '+item.carrier+item.flight+' '+item.orig+' → '+item.dest;pick.append(o)});
+  pick.onchange=()=>{if(!pick.value)return;const item=list[Number(pick.value)];const replaces=kind==='mod'?item.name:{airline:item.airline,orig:item.orig,dest:item.dest,flight:item.flight};openEditor({kind,payload:item,_replaces:replaces,published:true})};
+ }
  function openEditor(item){
   const root=document.getElementById('atlasAdminEditor');if(!root)return;root.innerHTML=editorHTML(item);
   root.querySelector('#atlasAdminCancel').onclick=()=>root.innerHTML='';
@@ -117,12 +129,13 @@
    try{
     const kind=form.elements.namedItem('kind').value,id=form.elements.namedItem('id').value;
     const payload=collect(form),uploaded=await uploadImage(form.elements.namedItem('upload').files[0]);
+    const original=JSON.parse(form.elements.namedItem('replaces')?.value||'""');if(original)payload.replaces=original;
     if(uploaded)payload.image=uploaded;
     const row={kind,payload,published:form.elements.namedItem('published').checked,updated_by:me.id,updated_at:new Date().toISOString()};
     if(id)await api('/rest/v1/atlas_content?id=eq.'+encodeURIComponent(id),{method:'PATCH',data:row});
     else await api('/rest/v1/atlas_content',{method:'POST',data:row});
     root.innerHTML='';status('Сохранено. Опубликованные изменения увидят пользователи при следующей загрузке каталога.');
-    await refreshAdmin();
+    await refreshAdmin();await loadContent();
    }catch(e){status('Не удалось сохранить: '+e.message)}finally{button.disabled=false}
   };
  }
