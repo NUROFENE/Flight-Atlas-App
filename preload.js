@@ -1,6 +1,10 @@
 const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('flightAtlasDesktop',Object.freeze({
   version:()=>ipcRenderer.invoke('app:version'),
+  minimizeWindow:()=>ipcRenderer.invoke('window:minimize'),
+  toggleMaximizeWindow:()=>ipcRenderer.invoke('window:toggle-maximize'),
+  closeWindow:()=>ipcRenderer.invoke('window:close'),
+  isWindowMaximized:()=>ipcRenderer.invoke('window:is-maximized'),
   metar:ids=>ipcRenderer.invoke('weather:metar',ids),
   simbrief:id=>ipcRenderer.invoke('flight:simbrief',id),
   simconnect:()=>ipcRenderer.invoke('simconnect:status'),
