@@ -338,6 +338,15 @@ body.theme-black main:has(#routesPage[style*="display: block"]){background:linea
 #activeView .simbrief-ofp-card,#activeView .brief-content,#activeView #ofpContainer{min-width:0!important;max-width:100%!important}
 #activeView #geoRouteMap{width:100%!important;max-width:100%!important;height:clamp(300px,calc(100dvh - 335px),800px)!important;min-height:300px!important;box-sizing:border-box!important}
 #activeView #geoRouteMap svg,#activeView #geoRouteMap>div{max-width:none}
+
+/* RAW OFP: pinned page navigation and responsive text pages */
+#activeView .ofp-raw-layout{display:grid!important;grid-template-columns:minmax(0,1fr) clamp(105px,13vw,142px)!important;gap:12px;align-items:start;min-width:0;width:100%;max-width:100%}
+#activeView .ofp-raw-pages{min-width:0;max-width:100%;overflow:visible!important}
+#activeView .ofp-raw-page{width:100%;min-width:0;max-width:100%;overflow:hidden;padding:clamp(8px,1.4vw,20px)!important}
+#activeView .ofp-raw-page pre{white-space:pre-wrap!important;overflow-wrap:anywhere!important;word-break:normal;max-width:100%!important;font-size:clamp(9px,0.85vw,12px)!important;line-height:1.5}
+#activeView .ofp-pages-sidebar{position:sticky!important;top:10px!important;height:min(78dvh,850px)!important;max-height:calc(100dvh - 30px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;align-self:start;z-index:7;scrollbar-width:thin}
+#activeView .ofp-pages-sidebar .ofp-page-thumb{flex-shrink:0}
+@media(max-width:1050px){#activeView .ofp-raw-layout{grid-template-columns:minmax(0,1fr) 105px!important}#activeView .ofp-raw-page pre{font-size:9px!important}}
 </style><style id="fa-modal-fix">
 html body #atlasUpdateConfirm{position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100dvh!important;z-index:2147483000!important;box-sizing:border-box!important;margin:0!important;padding:24px!important;background:rgba(3,9,19,.58)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;align-items:center!important;justify-content:center!important;overflow:auto!important;transform:none!important}
 html body #atlasUpdateConfirm:not(.open){display:none!important}
