@@ -87,8 +87,31 @@ async function handle(request){try{
 }
 function emit(type,extra={}){if(win&&!win.isDestroyed())win.webContents.send('updater:event',{type,...extra})}
 function updaterConfigured(){return app.isPackaged && process.env.FLIGHT_ATLAS_DISABLE_UPDATES!=='1'}
+// Navigraph SimLink process control (Windows only).
+const {execFile}=require('node:child_process');
+const SIMLINK_BINARY='NavigraphSimlink.exe';
+const simlinkCandidates=[
+ path.join(process.env.ProgramFiles||'C:\\Program Files','Navigraph','Simlink',SIMLINK_BINARY),
+ path.join(process.env['ProgramFiles(x86)']||'C:\\Program Files (x86)','Navigraph','Simlink',SIMLINK_BINARY)
+];
+function simlinkPath(){return simlinkCandidates.find(p=>fsSync.existsSync(p))||null}
+function processCheck(){return new Promise(resolve=>{if(process.platform!=='win32')return resolve(false);execFile('tasklist',['/FI','IMAGENAME eq '+SIMLINK_BINARY,'/FO','CSV','/NH'],{windowsHide:true,timeout:8000},(err,stdout)=>resolve(!err&&stdout.toLowerCase().includes(SIMLINK_BINARY.toLowerCase())))})}
+async function simlinkStatus(){return {installed:!!simlinkPath(),running:await processCheck()}}
+async function simlinkToggle(enabled){
+ if(process.platform!=='win32')return {ok:false,error:'SimLink поддерживается только в Windows'};
+ const installed=simlinkPath(),running=await processCheck();
+ if(enabled){
+  if(running)return {ok:true,running:true};
+  if(!installed)return {ok:false,error:'Navigraph SimLink не найден. Установи SimLink с сайта Navigraph.'};
+  try{const child=spawn(installed,[],{detached:true,stdio:'ignore',windowsHide:true});child.unref();return {ok:true,running:true}}catch(e){return {ok:false,error:e.message}}
+ }
+ if(!running)return {ok:true,running:false};
+ return new Promise(resolve=>execFile('taskkill',['/IM',SIMLINK_BINARY],{windowsHide:true,timeout:8000},(err)=>resolve(err?{ok:false,error:err.message}:{ok:true,running:false})));
+}
 function setupUpdater(){
  ipcMain.handle('simconnect:status',()=>simBridge.snapshot());
+ ipcMain.handle('simlink:status',()=>simlinkStatus());
+ ipcMain.handle('simlink:toggle',(_event,enabled)=>simlinkToggle(enabled===true));
  ipcMain.handle('weather:metar',async(_e,ids)=>{
   if(!/^[A-Z0-9]{4}(,[A-Z0-9]{4}){0,6}$/.test(ids))throw Error('Недопустимые ICAO');
   const response=await getRemote('https://aviationweather.gov/api/data/metar?ids='+encodeURIComponent(ids)+'&format=json','application/json',30);
