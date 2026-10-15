@@ -1617,7 +1617,7 @@ desktop.onUpdate(info=>{
 });
 document.addEventListener('click',async event=>{
  const button=event.target.closest('#atlasUpdate');if(!button||downloaded)return;
- if(!available){setLabel('Проверка…');const result=await desktop.checkUpdates();if(!result.ok){setLabel('Ошибка');alert('Не удалось проверить обновления: '+result.error);}else if(!available){showUpdateConfirmation();}return;}
+ if(!available){setLabel('Проверка…');const result=await desktop.checkUpdates();if(!result.ok){setLabel('Ошибка');alert('Не удалось проверить обновления: '+result.error);}else if(!available){showToast('Flight Atlas · v'+(installedVersion||'—'),'Обновлений пока нет',5000);}return;}
  showUpdateConfirmation();
 });
 setTimeout(async()=>{const result=await desktop.checkUpdates().catch(e=>({ok:false,error:e.message}));if(!result?.ok)showToast('Flight Atlas · v'+(installedVersion||'—'),'Не удалось проверить актуальность версии',8500);},2000);
