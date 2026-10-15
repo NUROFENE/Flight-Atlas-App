@@ -1186,6 +1186,48 @@ async function completeFlight(){if(!activeFlight)return;if(!confirm('Завер�
  localStorage.setItem(HISTORY_KEY,JSON.stringify([entry,...getHistory()].slice(0,500)));
  activeFlight=null;flightTrackDraft=null;localStorage.removeItem(TRACK_KEY);localStorage.removeItem('flightAtlasActiveV3');showActiveNav();openProfile()}
 function openProfile(){$('vatsimView').style.display='none';$('vatsimNav').classList.remove('current');$('chartsView').style.display='none';$('chartsNav').classList.remove('current');$('lobbyPage').style.display='none';$('routesPage').style.display='none';$('activeView').style.display='none';$('profileView').style.display='block';renderProfile();document.querySelector('main').scrollTop=0}
+
+// Flight history replay: actual telemetry rather than the planned OFP route.
+let historyMapViewer=null;
+async function openFlightHistoryMap(index){
+ const record=getHistory()[index];if(!record)return;
+ if(historyMapViewer){try{historyMapViewer.remove()}catch{}historyMapViewer=null}
+ document.getElementById('flightHistoryMapOverlay')?.remove();
+ const overlay=document.createElement('div');overlay.id='flightHistoryMapOverlay';
+ overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:#090f1de8;display:flex;align-items:center;justify-content:center;padding:20px';
+ overlay.innerHTML='<div style="background:#132239;border:1px solid #48769e;border-radius:13px;width:min(1280px,96vw);height:min(850px,94vh);display:flex;flex-direction:column;overflow:hidden"><div style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px"><div><strong>'+esc(record.airline||'')+esc(record.number||'')+' · '+esc(record.orig)+' → '+esc(record.dest)+'</strong><div style="font-size:12px;color:#aac5df">Фактическая траектория SimConnect · Касания: '+(record.touchdowns?.length||0)+'</div></div><button class="btn" id="flightHistoryMapClose">✕ Закрыть</button></div><div id="flightHistoryMapCanvas" style="flex:1;min-height:0;background:#0a1827;position:relative"></div></div>';
+ document.body.appendChild(overlay);
+ const close=()=>{try{historyMapViewer?.remove()}catch{}historyMapViewer=null;overlay.remove()};
+ overlay.querySelector('#flightHistoryMapClose').onclick=close;
+ overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+ const points=(record.flightTrack||[]).filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]));
+ const landings=(record.touchdowns||[]).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
+ const canvas=overlay.querySelector('#flightHistoryMapCanvas');
+ if(!points.length&&!landings.length){canvas.innerHTML='<div style="padding:24px;color:#d6e8fa">У этого рейса пока нет записанного трека. Запись координат работает для рейсов, выполненных после обновления.</div>';return}
+ try{
+  const lib=await ensureMapLibre();if(!canvas.isConnected)return;
+  const url='https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/style.json?key=LMCAiFiFwekWsRsfiueA';
+  let style='https://demotiles.maplibre.org/style.json';
+  try{const res=await fetch(url);if(res.ok)style=await res.json()}catch(e){}
+  const map=new lib.Map({container:canvas,style,center:[points[0]?.[1]??landings[0].lon,points[0]?.[0]??landings[0].lat],zoom:7});
+  historyMapViewer=map;
+  map.addControl(new lib.NavigationControl(),'top-right');
+  map.on('load',()=>{
+   if(points.length>1){map.addSource('actual-track',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:points.map(p=>[p[1],p[0]])},properties:{}}});
+    map.addLayer({id:'actual-track-line',type:'line',source:'actual-track',paint:{'line-color':'#62e38f','line-width':4,'line-opacity':.9}})}
+   const bounds=new lib.LngLatBounds();
+   for(const p of points)bounds.extend([p[1],p[0]]);
+   for(const p of landings)bounds.extend([p.lon,p.lat]);
+   if(!bounds.isEmpty())map.fitBounds(bounds,{padding:65,maxZoom:13,duration:550});
+   landings.forEach((p,i)=>{
+    const node=document.createElement('button');node.textContent='✈';node.title='Касание '+(i+1)+' · '+p.fpm+' FPM';node.style.cssText='border:2px solid #fff;border-radius:100%;width:34px;height:34px;background:#8e42d9;color:white;box-shadow:0 2px 8px #0009;cursor:pointer';
+    const pop=new lib.Popup({offset:20}).setHTML('<strong>Касание '+(i+1)+'</strong><div>'+esc(p.fpm)+' FPM</div><div>'+new Date(p.timestamp).toLocaleTimeString('ru-RU')+'</div>');
+    new lib.Marker({element:node}).setLngLat([p.lon,p.lat]).setPopup(pop).addTo(map);
+   });
+  });
+ }catch(err){canvas.textContent='Не удалось загрузить карту: '+String(err.message||err)}
+}
+
 function refreshProfileSidebar(){const pr=getProfile();$('profileNavSub').textContent=pr.nick||'Пилот'; const holder=$('profileNavAvatar');holder.replaceChildren();if(pr.avatar){const im=document.createElement('img');im.src=pr.avatar;im.alt='Аватар пилота';holder.appendChild(im)}else holder.textContent='✈'}
 const MODS_KEY='flightAtlasModsPrefsV27';
 const HISTORY_SORT_KEY='flightAtlasHistorySortV33';
@@ -1251,6 +1293,7 @@ function renderProfile(){const pr=getProfile(),history=getHistory().map((item,in
  $('profileView').querySelectorAll('[data-mod-type]').forEach(b=>b.onclick=()=>setModsPrefs({type:b.dataset.modType}));
  drawMods();
  $('themeBlue').onclick=()=>setTheme('blue');$('themeBlack').onclick=()=>setTheme('black');$('saveProfile').onclick=saveProfile;$('avatarInput').onchange=e=>setAvatar(e.target.files[0]);$('avatarFrame').onclick=()=>$('avatarInput').click();
+ $('profileView').querySelectorAll('.history-map').forEach(button=>{button.onclick=()=>openFlightHistoryMap(Number(button.dataset.flightMap))});
  $('profileView').querySelectorAll('.history-delete').forEach(button=>{button.onclick=()=>{
   const idx=Number(button.dataset.flightIndex);const saved=getHistory();
   if(!Number.isInteger(idx)||idx<0||idx>=saved.length)return;
