@@ -333,6 +333,11 @@ body.theme-black main:has(#routesPage[style*="display: block"]){background:linea
 .leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg)}
 .leaflet-tooltip{position:absolute;padding:5px 8px;background:#152c45;color:white;border:1px solid #6487a5;border-radius:5px;white-space:nowrap;pointer-events:none}
 .geo-map{background:#0d1929!important;min-height:500px!important}.geo-map .leaflet-container{width:100%;height:100%!important}
+
+/* v6.0.39: map always follows the usable flight panel width and viewport height. */
+#activeView .simbrief-ofp-card,#activeView .brief-content,#activeView #ofpContainer{min-width:0!important;max-width:100%!important}
+#activeView #geoRouteMap{width:100%!important;max-width:100%!important;height:clamp(300px,calc(100dvh - 335px),800px)!important;min-height:300px!important;box-sizing:border-box!important}
+#activeView #geoRouteMap svg,#activeView #geoRouteMap>div{max-width:none}
 </style><style id="fa-modal-fix">
 html body #atlasUpdateConfirm{position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100dvh!important;z-index:2147483000!important;box-sizing:border-box!important;margin:0!important;padding:24px!important;background:rgba(3,9,19,.58)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;align-items:center!important;justify-content:center!important;overflow:auto!important;transform:none!important}
 html body #atlasUpdateConfirm:not(.open){display:none!important}
@@ -869,8 +874,9 @@ async function renderGeoMap(){
  const project=(point,z)=>{const lat=Math.max(-85,Math.min(85,point[0]))*Math.PI/180;const n=256*2**z;return [(point[1]+180)/360*n,(1-Math.log(Math.tan(lat)+1/Math.cos(lat))/Math.PI)/2*n]};
  const unproject=(x,y,z)=>{const n=256*2**z;return [Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI,x/n*360-180]};
  let zoom=4,tileCache=new Map(),userMoved=false;
- const mapTilerBase='https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/256/';
+ const mapTilerBase='https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/';
  const mapTilerKey='LMCAiFiFwekWsRsfiueA';
+ let fallbackOSM=false;
  const labelsLayer=document.createElement('div');labelsLayer.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:hidden';target.appendChild(labelsLayer);
  const centerPx=()=>project([view.lat,view.lon],zoom);
  const coords=p=>{const c=centerPx(),pt=project(p,zoom);return [pt[0]-c[0]+target.clientWidth/2,pt[1]-c[1]+target.clientHeight/2]};
@@ -879,7 +885,8 @@ async function renderGeoMap(){
   for(let x=Math.floor(tx/256);x<=Math.floor((tx+w)/256);x++)for(let y=Math.floor(ty/256);y<=Math.floor((ty+h)/256);y++){
    if(y<0||y>=n)continue;const xx=((x%n)+n)%n,key=zoom+':'+xx+':'+y;needed.add(key);
    let im=tileCache.get(key);
-   if(!im){im=document.createElement('img');im.alt='';im.draggable=false;im.style.cssText='position:absolute;width:256px;height:256px;max-width:none;max-height:none;pointer-events:none';im.src=mapTilerBase+zoom+'/'+xx+'/'+y+'.png?key='+encodeURIComponent(mapTilerKey);tilesLayer.appendChild(im);tileCache.set(key,im)}
+   if(!im){im=document.createElement('img');im.alt='';im.draggable=false;im.style.cssText='position:absolute;width:256px;height:256px;max-width:none;max-height:none;pointer-events:none';im.src=fallbackOSM?'https://tile.openstreetmap.org/'+zoom+'/'+xx+'/'+y+'.png':mapTilerBase+zoom+'/'+xx+'/'+y+'.png?key='+encodeURIComponent(mapTilerKey);
+    im.onerror=()=>{if(fallbackOSM)return;fallbackOSM=true;for(const tile of tileCache.values())tile.remove();tileCache.clear();refreshTiles()};tilesLayer.appendChild(im);tileCache.set(key,im)}
    im.style.left=(x*256-tx)+'px';im.style.top=(y*256-ty)+'px';
   }
   for(const [key,img]of tileCache)if(!needed.has(key)){img.remove();tileCache.delete(key)}
@@ -918,7 +925,7 @@ async function renderGeoMap(){
  const fitZoom=()=>{const a=project([view.lat-view.spanLat/2,view.lon-view.spanLon/2],0),b=project([view.lat+view.spanLat/2,view.lon+view.spanLon/2],0);for(let z=13;z>=2;z--){const m=2**z;if(Math.abs(b[0]-a[0])*m<Math.max(1,target.clientWidth)*.84&&Math.abs(b[1]-a[1])*m<Math.max(1,target.clientHeight)*.84){zoom=z;return}}zoom=2};
  fitZoom();render();
  let lastWidth=target.clientWidth,lastHeight=target.clientHeight;
- flightMapResizeObserver=new ResizeObserver(()=>{if(!target.isConnected)return;const w=target.clientWidth,h=target.clientHeight;if(w<1||h<1||(w===lastWidth&&h===lastHeight))return;lastWidth=w;lastHeight=h;if(!userMoved)fitZoom();render()});
+ flightMapResizeObserver=new ResizeObserver(()=>{if(!target.isConnected)return;const w=target.clientWidth,h=target.clientHeight;if(w<1||h<1||(w===lastWidth&&h===lastHeight))return;lastWidth=w;lastHeight=h;fitZoom();render()});
  flightMapResizeObserver.observe(target);
  let pan=null;
  const clientToSvg=(dx,dy)=>[dx/Math.max(1,target.clientWidth)*1000,dy/Math.max(1,target.clientHeight)*650];
@@ -953,7 +960,7 @@ async function loadSimbriefOFP(){
   if(orig!==activeFlight.orig||dest!==activeFlight.dest)throw new Error(`Последний OFP — ${orig} → ${dest}, а выбран ${activeFlight.orig} → ${activeFlight.dest}. Сгенерируй план выбранного маршрута и нажми «Загрузить OFP».`);
   const navfixes=[...xml.querySelectorAll('OFP > navlog > fix')].map(f=>{const get=(...names)=>{for(const n of names){const v=f.querySelector(n)?.textContent?.trim();if(v&&v!=='-')return v}return ''};return {name:get('ident')||'FIX',airway:get('via_airway'),lat:Number(get('pos_lat')),lon:Number(get('pos_long')),altitude:get('altitude_feet','altitude','altitude_plan'),ias:get('ind_airspeed','ias'),tas:get('true_airspeed','tas'),mach:get('mach'),groundspeed:get('groundspeed')}}).filter(f=>Number.isFinite(f.lat)&&Number.isFinite(f.lon)&&Math.abs(f.lat)<=90&&Math.abs(f.lon)<=180&&!(f.lat===0&&f.lon===0));
    const navpoints=[...xml.querySelectorAll('OFP > navlog > fix')].map(f=>[Number(f.querySelector('pos_lat')?.textContent),Number(f.querySelector('pos_long')?.textContent)]).filter(([la,lo])=>Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(la)<=90&&Math.abs(lo)<=180&&!(la===0&&lo===0));
-  const altNodes=[...xml.querySelectorAll('OFP > alternates > alternate')];
+  const altNodes=[...xml.querySelectorAll('OFP > alternates > alternate, OFP > alternate')];
   const alternates=altNodes.map(n=>n.querySelector('icao_code')?.textContent?.trim()?.toUpperCase()).filter(Boolean);
   const alternateRoutes={};
   function fixList(node){return [...node.querySelectorAll('fix')].map(f=>f.querySelector('ident')?.textContent?.trim()).filter(Boolean)}
@@ -990,6 +997,12 @@ function weatherAirports(){
  const f=activeFlight,d=ofpState.data;
  const official=[...(d?.alternates||[]),d?.alternate].filter(Boolean);
  const manual=(f.alts||[]).filter(Boolean);
+ // Recover alternates from the saved SimBrief planning URL (up to four), including older saved flights.
+ try{const params=new URL(f.simbrief||'',location.href).searchParams;
+   for(let i=1;i<=4;i++){const v=params.get('altn_'+i+'_id');if(v)manual.push(v)}
+   const first=params.get('altn');if(first)manual.push(...first.split(/[ ,;]/));
+ }catch(_){}
+ // Do not discard user-selected alternate airports simply because the generated OFP contains one primary alternate.
  const extras=[...manual,...official].map(code=>String(code).trim().toUpperCase()).filter(code=>/^[A-Z0-9]{4}$/.test(code));
  const seen=new Set([f.orig,f.dest]),list=[{code:f.orig,role:'ВЫЛЕТ'},{code:f.dest,role:'ПРИЛЁТ'}];
  for(const code of extras){if(seen.has(code))continue;seen.add(code);list.push({code,role:'ЗАПАСНОЙ '+(list.length-1)})}
