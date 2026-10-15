@@ -835,11 +835,22 @@ function geoCoords(icao){const row=AIRDATA.find(a=>a[0]===icao);return row?[row[
 function ofpRouteMap(d){return `<div id="geoRouteMap" class="geo-map" aria-label="Карта маршрута и запасных аэродромов"></div>`}
 function alternateRouteMarkup(d){const alts=[...(activeFlight?.alts||[]),...(d.alternates||[]),d.alternate].filter(Boolean);const unique=[...new Set(alts)].filter(a=>a!==d.orig&&a!==d.dest);return `<div class="alternate-route-list">${unique.length?unique.map((a,i)=>{const route=d.alternateRoutes?.[a];return `<div class="alt-route-row"><span><b>${i+1}. ${esc(d.dest)} → ${esc(a)}</b><br><small>${esc(airport(d.dest))} → ${esc(airport(a))}</small>${route?.length?`<div class="alt-route-waypoints">${route.map(p=>esc(p)).join(' → ')}</div>`:`<div class="alt-route-waypoints" style="color:#e4ad85">SimBrief не передал маршрут на этот запасной</div>`}</span></div>`}).join(''):'<p>Запасные аэродромы не выбраны.</p>'}</div>`}let leafletMap=null;
 let flightMapResizeObserver=null;
+let vectorFlightMap=null;
+let mapLibreLoader=null;
+function ensureMapLibre(){
+ if(window.maplibregl)return Promise.resolve(window.maplibregl);
+ if(mapLibreLoader)return mapLibreLoader;
+ mapLibreLoader=new Promise((resolve,reject)=>{
+   const css=document.createElement('link');css.rel='stylesheet';css.href='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css';document.head.appendChild(css);
+   const script=document.createElement('script');script.src='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';script.onload=()=>window.maplibregl?resolve(window.maplibregl):reject(Error('MapLibre unavailable'));script.onerror=()=>reject(Error('MapLibre download failed'));document.head.appendChild(script);
+ }).catch(err=>{mapLibreLoader=null;throw err});return mapLibreLoader;
+}
 async function renderGeoMap(){
  const target=document.getElementById('geoRouteMap'),d=ofpState.data;
  if(!target||!d)return;
  if(leafletMap){try{leafletMap.remove()}catch{}leafletMap=null}
  if(flightMapResizeObserver){flightMapResizeObserver.disconnect();flightMapResizeObserver=null}
+ if(vectorFlightMap){try{vectorFlightMap.remove()}catch{}vectorFlightMap=null}
  target.replaceChildren();
  const route=(d.navpoints||[]).filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180);
  const geo=x=>{const coords=geoCoords(x);return coords&&Number.isFinite(coords[0])&&Number.isFinite(coords[1])?coords:null};
@@ -853,7 +864,7 @@ async function renderGeoMap(){
  const latMin=Math.min(...points.map(p=>p[0])),latMax=Math.max(...points.map(p=>p[0])),lonMin=Math.min(...points.map(p=>p[1])),lonMax=Math.max(...points.map(p=>p[1]));
  const view={lat:(latMin+latMax)/2,lon:(lonMin+lonMax)/2,spanLat:Math.max(1.8,(latMax-latMin)*1.4),spanLon:Math.max(2.5,(lonMax-lonMin)*1.4)};
  view.spanLat=Math.min(150,view.spanLat);view.spanLon=Math.min(350,view.spanLon);
- const tilesLayer=document.createElement('div');tilesLayer.style.cssText='position:absolute;inset:0;overflow:hidden;filter:brightness(.65) saturate(.85)';target.appendChild(tilesLayer);
+ const tilesLayer=document.createElement('div');tilesLayer.style.cssText='position:absolute;inset:0;overflow:hidden';target.appendChild(tilesLayer);
  const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');overlay.classList.add('apple-overlay');overlay.setAttribute('viewBox','0 0 '+Math.max(1,target.clientWidth)+' '+Math.max(1,target.clientHeight));overlay.setAttribute('preserveAspectRatio','none');target.appendChild(overlay);
  
  const popup=document.createElement('div');popup.className='apple-point-popup';popup.hidden=true;target.appendChild(popup);
@@ -874,20 +885,27 @@ async function renderGeoMap(){
  const project=(point,z)=>{const lat=Math.max(-85,Math.min(85,point[0]))*Math.PI/180;const n=256*2**z;return [(point[1]+180)/360*n,(1-Math.log(Math.tan(lat)+1/Math.cos(lat))/Math.PI)/2*n]};
  const unproject=(x,y,z)=>{const n=256*2**z;return [Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI,x/n*360-180]};
  let zoom=4,tileCache=new Map(),userMoved=false;
- const mapTilerBase='https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/';
- const mapTilerKey='LMCAiFiFwekWsRsfiueA';
- let fallbackOSM=false;
- try {const check=await fetch('https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/style.json?key='+encodeURIComponent(mapTilerKey),{cache:'no-store'});if(!check.ok){fallbackOSM=true;console.warn('MapTiler style not available, using OpenStreetMap: '+check.status)}}catch(err){fallbackOSM=true;console.warn('MapTiler style validation failed',err)};
+ const mapTilerStyle='https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/style.json?key=LMCAiFiFwekWsRsfiueA';
+ let fallbackOSM=false,vectorReady=false,vectorMap=null;
+ try{
+   const lib=await ensureMapLibre();
+   if(!target.isConnected)return;
+   vectorMap=new lib.Map({container:tilesLayer,style:mapTilerStyle,center:[view.lon,view.lat],zoom:3,interactive:false,attributionControl:true,renderWorldCopies:true});
+   vectorFlightMap=vectorMap;
+   vectorReady=true;
+   vectorMap.on('error',e=>{console.warn('MapTiler map error:',e.error?.message||e);});
+ }catch(err){console.warn('MapLibre unavailable; using OpenStreetMap:',err);fallbackOSM=true}
+ const tileCache=new Map();
  const labelsLayer=document.createElement('div');labelsLayer.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:hidden';target.appendChild(labelsLayer);
  const centerPx=()=>project([view.lat,view.lon],zoom);
  const coords=p=>{const c=centerPx(),pt=project(p,zoom);return [pt[0]-c[0]+target.clientWidth/2,pt[1]-c[1]+target.clientHeight/2]};
  const refreshTiles=()=>{
+  if(vectorReady&&vectorMap){vectorMap.resize();vectorMap.jumpTo({center:[view.lon,view.lat],zoom:Math.max(0,zoom-1),bearing:0,pitch:0});return}
   const c=centerPx(),w=target.clientWidth,h=target.clientHeight,tx=c[0]-w/2,ty=c[1]-h/2,n=2**zoom,needed=new Set();
   for(let x=Math.floor(tx/256);x<=Math.floor((tx+w)/256);x++)for(let y=Math.floor(ty/256);y<=Math.floor((ty+h)/256);y++){
    if(y<0||y>=n)continue;const xx=((x%n)+n)%n,key=zoom+':'+xx+':'+y;needed.add(key);
    let im=tileCache.get(key);
-   if(!im){im=document.createElement('img');im.alt='';im.draggable=false;im.style.cssText='position:absolute;width:256px;height:256px;max-width:none;max-height:none;pointer-events:none';im.src=fallbackOSM?'https://tile.openstreetmap.org/'+zoom+'/'+xx+'/'+y+'.png':mapTilerBase+zoom+'/'+xx+'/'+y+'.png?key='+encodeURIComponent(mapTilerKey);
-    im.onerror=()=>{if(fallbackOSM)return;fallbackOSM=true;for(const tile of tileCache.values())tile.remove();tileCache.clear();refreshTiles()};tilesLayer.appendChild(im);tileCache.set(key,im)}
+   if(!im){im=document.createElement('img');im.alt='';im.draggable=false;im.style.cssText='position:absolute;width:256px;height:256px;max-width:none;max-height:none;pointer-events:none';im.src='https://tile.openstreetmap.org/'+zoom+'/'+xx+'/'+y+'.png';tilesLayer.appendChild(im);tileCache.set(key,im)}
    im.style.left=(x*256-tx)+'px';im.style.top=(y*256-ty)+'px';
   }
   for(const [key,img]of tileCache)if(!needed.has(key)){img.remove();tileCache.delete(key)}
