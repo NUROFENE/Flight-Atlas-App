@@ -126,15 +126,15 @@ function setupUpdater(){
   const response=await getRemote('https://www.simbrief.com/api/xml.fetcher.php?userid='+id,'application/xml',40);
   return response.text();
  });
- autoUpdater.autoDownload=false;
- autoUpdater.autoInstallOnAppQuit=false;
+ autoUpdater.autoDownload=true;
+ autoUpdater.autoInstallOnAppQuit=true;
  autoUpdater.setFeedURL({provider:'github',owner:'NUROFENE',repo:'Flight-Atlas-App'});
  let ready=false;
  autoUpdater.on('checking-for-update',()=>emit('checking'));
  autoUpdater.on('update-available',info=>emit('available',{version:info.version,releaseNotes:info.releaseNotes||''}));
  autoUpdater.on('update-not-available',()=>emit('current'));
  autoUpdater.on('download-progress',info=>emit('progress',{percent:Math.round(info.percent)}));
- autoUpdater.on('update-downloaded',info=>{ready=true;emit('downloaded',{version:info.version})});
+ autoUpdater.on('update-downloaded',info=>{ready=true;emit('downloaded',{version:info.version});setTimeout(()=>autoUpdater.quitAndInstall(true,true),1200)});
  autoUpdater.on('error',err=>emit('error',{message:err.message}));
  ipcMain.handle('app:version',()=>app.getVersion());
  ipcMain.handle('updater:check',async()=>{
@@ -153,7 +153,7 @@ function setupUpdater(){
  });
 }
 function buildWindow(){Menu.setApplicationMenu(null);win=new BrowserWindow({frame:false,width:1500,height:940,minWidth:1000,minHeight:650,backgroundColor:'#0b1322',title:'',show:false,autoHideMenuBar:true,icon:path.join(ROOT,'FlightAtlas.ico'),webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
- win.once('ready-to-show',()=>{win.setTitle('');win.show()});win.loadURL('atlas://flightatlas/');
+ win.once('ready-to-show',()=>{win.setTitle('');win.show();if(updaterConfigured())setTimeout(()=>autoUpdater.checkForUpdates().catch(e=>emit('error',{message:e.message})),1500)});win.loadURL('atlas://flightatlas/');
  win.webContents.setWindowOpenHandler(({url})=>{if(/^https:\/\//i.test(url))shell.openExternal(url);return {action:'deny'}});
  win.webContents.on('will-navigate',(ev,url)=>{if(!url.startsWith('atlas://flightatlas/')){ev.preventDefault();if(/^https:\/\//i.test(url))shell.openExternal(url)}});
  win.webContents.on('render-process-gone',()=>dialog.showErrorBox('Flight Atlas','Процесс интерфейса остановился. Перезапустите приложение.'));
