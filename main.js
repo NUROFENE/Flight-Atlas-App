@@ -109,6 +109,10 @@ async function simlinkToggle(enabled){
  return new Promise(resolve=>execFile('taskkill',['/IM',SIMLINK_BINARY],{windowsHide:true,timeout:8000},(err)=>resolve(err?{ok:false,error:err.message}:{ok:true,running:false})));
 }
 function setupUpdater(){
+ ipcMain.handle('window:minimize',()=>{win?.minimize();return true});
+ ipcMain.handle('window:toggle-maximize',()=>{if(!win)return false;win.isMaximized()?win.unmaximize():win.maximize();return win.isMaximized()});
+ ipcMain.handle('window:close',()=>{win?.close();return true});
+ ipcMain.handle('window:is-maximized',()=>win?.isMaximized()||false);
  ipcMain.handle('simconnect:status',()=>simBridge.snapshot());
  ipcMain.handle('simlink:status',()=>simlinkStatus());
  ipcMain.handle('simlink:toggle',(_event,enabled)=>simlinkToggle(enabled===true));
@@ -148,7 +152,7 @@ function setupUpdater(){
   }catch(e){emit('error',{message:e.message});return {ok:false,error:e.message}}
  });
 }
-function buildWindow(){Menu.setApplicationMenu(null);win=new BrowserWindow({width:1500,height:940,minWidth:1000,minHeight:650,backgroundColor:'#0b1322',title:'',show:false,autoHideMenuBar:true,icon:path.join(ROOT,'FlightAtlas.ico'),webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+function buildWindow(){Menu.setApplicationMenu(null);win=new BrowserWindow({frame:false,width:1500,height:940,minWidth:1000,minHeight:650,backgroundColor:'#0b1322',title:'',show:false,autoHideMenuBar:true,icon:path.join(ROOT,'FlightAtlas.ico'),webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
  win.once('ready-to-show',()=>{win.setTitle('');win.show()});win.loadURL('atlas://flightatlas/');
  win.webContents.setWindowOpenHandler(({url})=>{if(/^https:\/\//i.test(url))shell.openExternal(url);return {action:'deny'}});
  win.webContents.on('will-navigate',(ev,url)=>{if(!url.startsWith('atlas://flightatlas/')){ev.preventDefault();if(/^https:\/\//i.test(url))shell.openExternal(url)}});
