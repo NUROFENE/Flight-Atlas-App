@@ -4,7 +4,7 @@
 let simconnectModule=null;
 const DEF=2711,REQUEST=2712;
 class FlightAtlasSimConnect{
- constructor(){this.handle=null;this.timer=null;this.connecting=false;this.stopped=false;this.last=null;this.state='waiting';this.simulator='';this.error='';this.lastAt=0;this.landing=null;this.airborne=false;this.priorVerticalFpm=null;this.lastTouchdownAt=0;}
+ constructor(){this.handle=null;this.timer=null;this.connecting=false;this.stopped=false;this.last=null;this.state='waiting';this.simulator='';this.error='';this.lastAt=0;this.landing=null;this.landings=[];this.airborne=false;this.priorVerticalFpm=null;this.lastTouchdownAt=0;}
  start(){if(this.timer)return;this.stopped=false;this._connect();this.timer=setInterval(()=>{if(!this.handle&&!this.connecting)this._connect();if(this.handle&&Date.now()-this.lastAt>12000&&this.lastAt){this._disconnect()}},5000);}
  stop(){this.stopped=true;if(this.timer)clearInterval(this.timer);this.timer=null;this._disconnect();}
  _disconnect(){const h=this.handle;this.handle=null;this.last=null;this.lastAt=0;this.state='waiting';if(h)try{h.close()}catch(_){}}
@@ -26,7 +26,7 @@ class FlightAtlasSimConnect{
        if(!onGround)this.airborne=true;
        if(onGround&&this.airborne&&this.last?.onGround===false&&now-this.lastTouchdownAt>15000){
          const fpm=Math.round(this.priorVerticalFpm??verticalFpm);
-         if(Number.isFinite(fpm)){this.landing={fpm:Math.min(0,fpm),timestamp:now,lat:vals[0],lon:vals[1]};this.lastTouchdownAt=now}
+         if(Number.isFinite(fpm)){this.landing={fpm:Math.min(0,fpm),timestamp:now,lat:vals[0],lon:vals[1]};this.lastTouchdownAt=now;this.landings.push(this.landing);if(this.landings.length>100)this.landings.shift()}
          this.airborne=false;
        }
        if(!onGround)this.priorVerticalFpm=verticalFpm;
@@ -41,6 +41,6 @@ class FlightAtlasSimConnect{
    }catch(e){this.handle=null;this.state='waiting';this.error=String(e?.message||e)}
    finally{this.connecting=false}
  }
- snapshot(){return {state:this.state,simulator:this.simulator,error:this.state==='connected'?'':this.error,position:this.last&&Date.now()-this.last.timestamp<10000?this.last:null,landing:this.landing}}
+ snapshot(){return {state:this.state,simulator:this.simulator,error:this.state==='connected'?'':this.error,position:this.last&&Date.now()-this.last.timestamp<10000?this.last:null,landing:this.landing,landings:this.landings.slice(-30)}}
 }
 module.exports={FlightAtlasSimConnect};
