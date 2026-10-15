@@ -28,8 +28,8 @@ async function syncOwnProfile(){
  if(!await ensureSession())return;
  const nickname=(document.getElementById('profileNick')?.value||'').trim().slice(0,40)||'Пилот';
  try{
- await request('/rest/v1/profiles?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},data:{id:session.user.id,nickname}});
- }catch(e){setStatus('Аккаунт создан, но таблицы ещё не настроены: '+e.message,true)}
+ await request('/rest/v1/atlas_profiles?id=eq.'+encodeURIComponent(session.user.id),{method:'PATCH',data:{nickname}});
+ }catch(e){setStatus('Облачный профиль пока не настроен: '+e.message,true)}
 }
 function setStatus(message,error=false){const node=document.getElementById('atlasAuthStatus');if(node){node.textContent=message;node.style.color=error?'#ff8f8f':''}}
 function mount(){
