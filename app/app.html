@@ -1812,7 +1812,7 @@ confirmScreen.querySelector('#faUpdateYes').onclick=async()=>{
  if(!result.ok){updateScreen.classList.remove('open');alert('Не удалось установить обновление: '+result.error);if(button)button.disabled=false;setLabel('Повторить');}
 };
 
-updateScreen.querySelector('#atlasUpdateDismiss').onclick=()=>updateScreen.classList.remove('open');
+updateScreen.querySelector('#atlasUpdateDismiss').onclick=()=>{if(!available)updateScreen.classList.remove('open')};
 function progressScreen(n,label,stage='Загрузка файлов'){
  const value=Number.isFinite(Number(n))?Math.max(0,Math.min(100,Number(n))):0;
  updateScreen.classList.add('open');
