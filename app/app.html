@@ -877,6 +877,7 @@ async function renderGeoMap(){
  const mapTilerBase='https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/';
  const mapTilerKey='LMCAiFiFwekWsRsfiueA';
  let fallbackOSM=false;
+ try {const check=await fetch('https://api.maptiler.com/maps/01a13daa-12a5-7052-89df-08dc87e5e047/style.json?key='+encodeURIComponent(mapTilerKey),{cache:'no-store'});if(!check.ok){fallbackOSM=true;console.warn('MapTiler style not available, using OpenStreetMap: '+check.status)}}catch(err){fallbackOSM=true;console.warn('MapTiler style validation failed',err)};
  const labelsLayer=document.createElement('div');labelsLayer.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:hidden';target.appendChild(labelsLayer);
  const centerPx=()=>project([view.lat,view.lon],zoom);
  const coords=p=>{const c=centerPx(),pt=project(p,zoom);return [pt[0]-c[0]+target.clientWidth/2,pt[1]-c[1]+target.clientHeight/2]};
