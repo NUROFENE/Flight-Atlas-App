@@ -1,12 +1,20 @@
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
-import { CapacitorHttp } from '@capacitor/core';
+import { CapacitorHttp, registerPlugin } from '@capacitor/core';
 
 const CALLBACK = 'flightatlas://auth/callback';
+// A dedicated Android Activity opens the REAL website as the top-level page.
+// This avoids iframe restrictions and never switches to Chrome for the radar.
+const Radar = registerPlugin('Radar');
+const openRadar = async () => {
+  try { await Radar.open(); }
+  catch (err) { console.error('In-app radar unavailable:', err); alert('Не удалось открыть встроенный VATSIM Radar: ' + (err?.message || err)); }
+};
+window.AtlasNativeRadar = { open: openRadar, reload: openRadar };
 const listeners = new Set();
 const errorListeners = new Set();
 let lastCallback = '';
-const mobileVersion = 'Android beta 0.1.0';
+const mobileVersion = 'Android beta 0.2.0';
 const dispatchCallback = url => {
   if (typeof url !== 'string' || !url.startsWith(CALLBACK)) return;
   if (url === lastCallback) return;
@@ -105,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   const header = document.createElement('header');
   header.className = 'fa-mobile-header';
-  header.innerHTML = '<div class="fa-mobile-logo">✈</div><div><strong>FLIGHT ATLAS</strong><small>ANDROID · BETA</small></div><span class="fa-mobile-online" title="Каталог синхронизируется через интернет">●</span>';
+  header.innerHTML = '<div class="fa-mobile-logo">✈</div><div><strong>FLIGHT ATLAS</strong><small>ANDROID · v0.2</small></div><span class="fa-mobile-online" title="Каталог синхронизируется через интернет">●</span>';
   const nav = document.createElement('nav');
   nav.className = 'fa-mobile-tabs';
   nav.setAttribute('aria-label', 'Основные разделы Flight Atlas');
@@ -124,10 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
     b.append(glyph, name);
     b.addEventListener('click', () => {
       setCurrent(id);
-      if (id === 'vatsimNav') {
-        void openExternal('https://vatsim-radar.com/');
-        return;
-      }
       const target = document.getElementById(id);
       if (target) target.click();
     });
