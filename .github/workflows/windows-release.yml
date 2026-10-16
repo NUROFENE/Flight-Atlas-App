@@ -3,6 +3,12 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - 'app/**'
+      - 'main.js'
+      - 'preload.js'
+      - 'simconnect-bridge.js'
+      - 'package.json'
 permissions:
   contents: write
 concurrency:
