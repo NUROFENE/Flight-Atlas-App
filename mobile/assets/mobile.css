@@ -79,3 +79,94 @@ body .lobby-grid > *, body .profile-grid > * { min-width: 0 !important; }
   body .layout>main, body.atlas-modern .layout>main { padding-left: max(18px, calc((100vw - 650px)/2)) !important;
     padding-right: max(18px, calc((100vw - 650px)/2)) !important; }
 }
+
+
+/* Mobile adaptation of the ACTUAL Flight Atlas cinematic airline landing page.
+   Tail cutouts, gradients, and photo backdrops ship with the latest web assets. */
+body.atlas-modern #lobbyPage .atlas-cinematic {
+  display:flex!important;
+  position:relative!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  width:100%!important;
+  min-height:calc(100dvh - 166px)!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  background:#181819!important;
+}
+body.atlas-modern #lobbyPage #atlasCinematicBackdrop {
+  position:absolute!important;inset:0!important;
+  z-index:0!important;overflow:hidden!important;pointer-events:none!important;
+  background:#151617;
+}
+body.atlas-modern #lobbyPage #atlasCinematicBackdrop .atlas-airline-photo {
+  background-size:cover!important;
+}
+body.atlas-modern #lobbyPage .atlas-cinematic-heading {
+  position:relative!important;z-index:2!important;
+  padding:34px 18px 22px!important;
+  max-width:100%!important;
+}
+body.atlas-modern #lobbyPage .atlas-cinematic-heading h1 {
+  font-size:clamp(27px,8vw,38px)!important;
+  line-height:1.08!important;
+  margin:10px 0!important;
+  max-width:100%!important;
+}
+body.atlas-modern #lobbyPage .atlas-cinematic-heading p {
+  font-size:12px!important;
+  color:#dadadc!important;
+  margin:0!important;
+}
+body.atlas-modern #lobbyPage .atlas-cinematic-bottom {
+  position:relative!important;z-index:3!important;
+  width:100%!important;min-width:0!important;
+  padding:12px 0 22px!important;overflow:hidden!important;
+}
+body.atlas-modern #lobbyPage #atlasCinematicTrack {
+  display:flex!important;gap:10px!important;
+  padding:8px 14px 14px!important;
+  width:max-content!important;
+  touch-action:pan-y!important;
+}
+body.atlas-modern #lobbyPage #atlasCinematicTrack .atlas-cinema-card {
+  flex:0 0 156px!important;
+  width:156px!important;height:198px!important;
+  min-width:0!important;
+  border-radius:16px!important;
+  padding:12px!important;
+  border:1px solid #ffffff4a!important;
+  box-shadow:0 10px 22px #0006!important;
+  text-align:left!important;
+}
+body.atlas-modern #lobbyPage #atlasCinematicTrack .atlas-cinema-card strong {
+  font-size:16px!important;
+  line-height:1.12!important;
+  position:relative!important;z-index:2!important;
+}
+body.atlas-modern #lobbyPage #atlasCinematicTrack .atlas-cinema-card small {
+  font-size:10px!important;line-height:1.15!important;
+  position:relative!important;z-index:2!important;
+}
+body.atlas-modern #lobbyPage #atlasCinematicTrack .atlas-cinema-card .atlas-tail-art {
+  max-width:100%!important;
+}
+body.atlas-modern #lobbyPage #atlasGlobalRandom {
+  margin:0 14px!important;
+  min-height:38px!important;
+}
+body.atlas-modern #lobbyPage .lobby-grid,body.atlas-modern #lobbyPage .lobby-stats {
+  display:none!important;
+}
+body.atlas-modern #routesPage .tablewrap,body.atlas-modern #chartsView {
+  overflow:auto!important;
+}
+body.atlas-modern #vatsimView {
+  min-height:0!important;
+}
+/* Radar is presented by RadarActivity; hide the desktop-only embed in the SPA. */
+body.flight-atlas-android #vatsimView .vatsim-shell {display:none!important}
