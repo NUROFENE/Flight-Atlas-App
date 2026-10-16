@@ -1,0 +1,81 @@
+/* Flight Atlas Android — graphite interface, completely isolated from desktop UI. */
+:root {
+  color-scheme: dark !important;
+  --bg: #181819 !important; --panel: #222224 !important; --panel2: #29292b !important;
+  --border: #343437 !important; --muted: #a8a8ad !important; --text: #f6f6f7 !important;
+  --accent: #fff !important;
+}
+html, body { width: 100% !important; height: 100% !important; margin: 0 !important; overflow-x: hidden !important; }
+body, body.atlas-modern { background: #181819 !important; background-image: none !important; color: #f5f5f5 !important; }
+body .atlas-window-title { display: none !important; }
+body .layout, body.atlas-modern .layout { display: block !important; width: 100% !important; max-width: 100vw !important;
+  height: 100dvh !important; min-height: 0 !important; margin: 0 !important; overflow: hidden !important;
+  grid-template-columns: 1fr !important; }
+body .layout>aside, body.atlas-modern .layout>aside { display: none !important; }
+body .layout>main, body.atlas-modern .layout>main {
+  display: block !important; height: 100dvh !important; width: 100% !important; min-width: 0 !important; max-width: 100vw !important;
+  padding: calc(69px + env(safe-area-inset-top, 0px)) 13px calc(93px + env(safe-area-inset-bottom, 0px)) !important;
+  margin: 0 !important; box-sizing: border-box !important; overflow-x: hidden !important; overflow-y: auto !important; overscroll-behavior: contain;
+}
+.fa-mobile-header { display: flex; align-items: center; gap: 11px; position: fixed; z-index: 4900;
+  top: 0; left: 0; right: 0; height: calc(58px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 18px 0;
+  background: #181819f5; border-bottom: 1px solid #323234; backdrop-filter: blur(20px); }
+.fa-mobile-logo { display: grid; place-items: center; width: 35px; height: 35px; flex: 0 0 35px; border-radius: 11px;
+  background: #efeff0; color: #181819; font-size: 20px; font-weight: 900; }
+.fa-mobile-header strong { display: block; color: #fff; font-weight: 900; font-size: 14px; letter-spacing: .09em; line-height: 1.15; }
+.fa-mobile-header small { display: block; color: #939396; font-weight: 700; font-size: 9px; letter-spacing: .18em; margin-top: 4px; }
+.fa-mobile-online { margin-left: auto; color: #68d7a5; font-size: 15px; }
+.fa-mobile-tabs { position: fixed; z-index: 4900; bottom: 0; left: 0; right: 0; height: calc(70px + env(safe-area-inset-bottom, 0px));
+  padding: 6px 2px calc(4px + env(safe-area-inset-bottom, 0px)); background: #1d1d1feF; border-top: 1px solid #37373a;
+  display: flex; gap: 0; justify-content: space-around; box-shadow: 0 -9px 30px #0005; backdrop-filter: blur(18px); }
+.fa-mobile-tabs button { flex: 1 1 0; padding: 5px 2px; background: transparent; color: #85858c; border: none;
+  border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1px;
+  font-size: 9px; font-weight: 650; white-space: nowrap; cursor: pointer; }
+.fa-mobile-tabs button.current { color: #fff; background: #313133; }
+.fa-mobile-tab-icon { font-size: 22px; line-height: 29px; font-weight: 600; }
+body #lobbyPage, body #routesPage, body #activeView, body #profileView, body #chartsView,
+body #leaderboardView, body #modernModsView { min-width: 0 !important; max-width: 100% !important;
+  width: 100% !important; padding: 0 0 18px !important; margin: 0 !important; box-sizing: border-box !important; }
+body .lobby-header { gap: 10px !important; flex-wrap: wrap !important; }
+body .lobby-header h1, body .hero h1 { font-size: clamp(26px, 7.5vw, 34px) !important; letter-spacing: -.8px !important; }
+body .hero { margin: 15px 0 18px !important; flex-wrap: wrap !important; }
+body .eyebrow { font-size: 10px !important; letter-spacing: .11em !important; color: #b5b5b9 !important; }
+body .top { font-size: 10px !important; }
+body .stats { display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px !important; }
+body .stat, body .card, body .airline-card, body .profile-card {
+  border-radius: 13px !important; background: #232325 !important; border-color: #39393c !important; box-shadow: none !important; }
+body .stat { padding: 12px !important; }
+body .stat .value { font-size: 21px !important; }
+body .controls { align-items: stretch !important; gap: 8px !important; margin-bottom: 13px !important; }
+body .search { flex: 1 0 100% !important; min-width: 0 !important; }
+body input, body select, body textarea { max-width: 100%; color: #f8f8f8 !important; background: #252527 !important; border-color: #454549 !important; }
+body .controls select { flex: 1 1 calc(50% - 8px) !important; width: 100% !important; min-width: 0 !important; }
+body button, body .btn { touch-action: manipulation; }
+body .btn { white-space: normal; background-color: #2f2f31 !important; color: #fff !important; border-color: #48484a !important; }
+body .btn.primary { background: #e9e9ea !important; color: #181819 !important; border-color: #fff !important; }
+body .tablewrap { width: 100% !important; overflow-x: auto !important; border-radius: 12px !important; background: #242426 !important; border-color: #38383b !important; }
+body #routesPage table { min-width: 640px !important; width: max-content !important; }
+body #routesPage th, body #routesPage td { padding: 10px 12px !important; }
+body #activeView .wx-cards.weather-visible { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: 8px !important; max-height: none !important; overflow: visible !important; }
+body #activeView .wx-card { width: 100% !important; height: auto !important; min-height: 155px !important; max-height: none !important; overflow: visible !important; }
+body #activeView .brief-content { max-width: 100% !important; overflow-x: auto !important; }
+body #activeView .wx-heading { flex-wrap: wrap !important; }
+body .modal, body .atlas-modal { max-width: 100vw !important; }
+body .modal-content, body .atlas-modal-content { width: calc(100vw - 20px) !important; max-width: 100% !important; max-height: 80dvh !important; overflow-y: auto !important; }
+body .vatsim-shell { inset: 73px 8px calc(83px + env(safe-area-inset-bottom, 0px)) !important; border-radius: 12px !important; }
+body .profile-shell, body .profile-grid { grid-template-columns: 1fr !important; width: 100% !important; min-width: 0 !important; }
+body #atlasUpdate, body .profile-update-btn { display: none !important; }
+body .grid, body .lobby-grid { max-width: 100% !important; }
+body .lobby-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+body .lobby-grid > *, body .profile-grid > * { min-width: 0 !important; }
+@media (max-width: 380px) {
+  .fa-mobile-tabs button { font-size: 8px; }
+  .fa-mobile-tab-icon { font-size: 19px; }
+  body .lobby-grid { gap: 9px !important; }
+  body .stats { gap: 6px !important; }
+}
+@media (min-width: 650px) {
+  body .layout>main, body.atlas-modern .layout>main { padding-left: max(18px, calc((100vw - 650px)/2)) !important;
+    padding-right: max(18px, calc((100vw - 650px)/2)) !important; }
+}
