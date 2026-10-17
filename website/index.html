@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#181819">
+  <meta name="description" content="Flight Atlas — приложение для виртуальных пилотов. Маршруты авиакомпаний, чарты, VATSIM, моды и история полётов в одном месте.">
+  <meta property="og:title" content="Flight Atlas — твоя авиация в одном месте">
+  <meta property="og:description" content="Маршруты, чарты, VATSIM, моды и инструменты для виртуальных пилотов.">
+  <meta property="og:type" content="website">
+  <title>Flight Atlas — твоя авиация в одном месте</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101011;--panel:#181819;--surface:#202022;--surface2:#28282b;--border:#343438;--muted:#99999f;--text:#f3f3f3;--white:#fff;--accent:#d9dce3}
+    *,*:before,*:after{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}button{font:inherit} ::selection{background:#aeb0bb;color:#101011}
+    .container{width:min(1170px,calc(100% - 48px));margin-inline:auto} .top-line{background:linear-gradient(90deg,#303136,#757981,#303136);height:1px;opacity:.5}
+    .nav{height:78px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid #ffffff0e}.brand{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+    .mark{display:grid;place-items:center;width:37px;height:37px;border:1px solid #83858a;border-radius:10px;background:linear-gradient(135deg,#fafafa 0%,#a3a4ac 34%,#54565c 58%,#dcdde2 100%);box-shadow:inset 0 1px 0 #fff8,0 2px 12px #0007;color:#171719;font-size:15px;font-weight:950;letter-spacing:-.08em}
+    .navlinks{display:flex;align-items:center;gap:31px;color:#b4b4ba;font-size:13px;font-weight:600}.navlinks a:hover,.footer a:hover{color:#fff}.nav-cta{font-size:12px;border:1px solid #55555a;padding:11px 17px;border-radius:9px;font-weight:700;white-space:nowrap;transition:.2s}.nav-cta:hover{background:#fff;color:#111}
+    .hero{position:relative;padding:90px 0 70px;overflow:hidden}.hero::before{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at 76% 44%,#5b60652c 0,transparent 51%),radial-gradient(ellipse at 0% 15%,#42464a15 0,transparent 50%)}.hero-inner{position:relative;display:grid;grid-template-columns:.88fr 1.12fr;align-items:center;gap:48px}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;color:#c5c5cb;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:750}.dot{width:7px;height:7px;background:#d6d8df;border-radius:50%;box-shadow:0 0 13px #ffffff66}
+    h1{margin:19px 0 23px;font-size:clamp(46px,5.7vw,80px);letter-spacing:-.065em;line-height:1.02;font-weight:800}h1 span{background:linear-gradient(115deg,#fff,#97999e);color:transparent;background-clip:text}
+    .lead{font-size:17px;line-height:1.8;color:#aaaab0;max-width:520px;margin:0}.actions{display:flex;gap:11px;margin-top:32px;flex-wrap:wrap}.button{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:0 21px;border:1px solid #55545a;border-radius:10px;font-size:13px;font-weight:750;transition:.2s;cursor:pointer}.button.white{color:#171719;background:#f0f0f2;border-color:#f0f0f2}.button.white:hover{background:#c8cbd0;border-color:#c8cbd0;transform:translateY(-2px)}.button.ghost{background:#ffffff08}.button.ghost:hover{background:#ffffff17}.button svg{width:17px;height:17px}
+    .meta{color:#787981;font-size:12px;margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.meta b{color:#c9c9ce;font-weight:600}
+    .preview-wrap{position:relative;min-width:0}.glow{position:absolute;inset:9% 0 0 6%;background:radial-gradient(ellipse,#d0d4e415,transparent 67%);filter:blur(32px)}
+    .app-preview{position:relative;border:1px solid #424348;border-radius:15px;overflow:hidden;background:#151516;box-shadow:0 24px 90px #000b,0 0 0 6px #ffffff03;transform:perspective(1400px) rotateY(-4deg) rotateX(2deg);min-width:0}
+    .window-head{height:39px;background:#1b1b1d;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #323235;padding:0 14px}.window-title{display:flex;align-items:center;gap:9px;font-size:10px;font-weight:750;letter-spacing:.1em;color:#c7c7cd}.lights{display:flex;gap:6px}.lights i{display:block;width:7px;height:7px;border-radius:50%;background:#4f5054}
+    .app-body{display:grid;grid-template-columns:57px 1fr;min-height:375px}.app-side{border-right:1px solid #343437;padding:18px 11px;display:flex;flex-direction:column;gap:13px;background:#1c1c1e}.sideitem{height:32px;width:34px;display:grid;place-items:center;color:#84848a;border-radius:8px;font-size:16px}.sideitem.active{background:#e9e9ea;color:#151515}.sideend{margin-top:auto}.app-main{min-width:0;padding:21px 23px;background:linear-gradient(145deg,#222225,#151516)}.app-kicker{font-size:9px;letter-spacing:.16em;color:#898990;font-weight:750}.app-h{font-size:24px;letter-spacing:-.05em;font-weight:750;margin:6px 0 16px}.search-line{height:31px;background:#262629;border:1px solid #414146;border-radius:7px;color:#74747a;font-size:10px;padding:9px 11px;display:flex;justify-content:space-between}.search-line span:last-child{color:#a9a9ac}
+    .route-card{margin-top:15px;border:1px solid #46464b;border-radius:10px;overflow:hidden;background:#202022}.route-head{display:flex;justify-content:space-between;align-items:center;padding:12px 13px 6px;color:#98989e;font-size:9px}.tag{border:1px solid #55555c;border-radius:5px;padding:4px 7px;color:#dadade;font-size:9px;font-weight:700}.airports{display:flex;align-items:center;gap:12px;padding:10px 13px 14px}.airport{flex:1;min-width:0}.icao{font-size:27px;font-weight:800;letter-spacing:-.04em}.city{font-size:9px;color:#909096;margin-top:2px}.route-graphic{display:flex;align-items:center;gap:3px;flex:1;min-width:70px}.route-graphic .line{height:1px;background:#6f7179;flex:1}.route-graphic .plane{font-size:16px;color:#d4d4d9}
+    .preview-bottom{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.mini{background:#29292c;border:1px solid #38383b;border-radius:8px;padding:11px}.mini small{color:#8e8e94;font-size:9px}.mini strong{display:block;font-size:12px;margin-top:5px}.preview-caption{text-align:right;font-size:10px;margin-top:13px;color:#777780}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,#353539 15%,#353539 85%,transparent)}.section{padding:89px 0}.section-heading{max-width:630px;margin-bottom:32px}.section-heading h2{font-size:clamp(32px,4vw,48px);letter-spacing:-.045em;line-height:1.1;margin:12px 0 13px}.section-heading p{font-size:14px;line-height:1.75;color:#a3a3a9;margin:0}
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.feature{min-height:193px;border:1px solid #333337;background:linear-gradient(155deg,#202022,#19191a);border-radius:13px;padding:24px;transition:.2s}.feature:hover{border-color:#66666b;transform:translateY(-3px)}.feature .feature-icon{height:37px;width:37px;border:1px solid #46464b;border-radius:10px;background:#ffffff08;display:grid;place-items:center;color:#f6f6f6;font-size:19px}.feature h3{font-size:17px;letter-spacing:-.025em;margin:21px 0 8px}.feature p{font-size:12px;line-height:1.7;color:#9a9aa0;margin:0}
+    .download-section{padding:34px 0 90px}.download-panel{position:relative;overflow:hidden;border:1px solid #49494e;background:linear-gradient(115deg,#242427,#161617);border-radius:17px;padding:48px;display:flex;align-items:center;justify-content:space-between;gap:35px}.download-panel:after{position:absolute;content:"FA";right:6%;top:-86px;font-size:290px;font-weight:900;letter-spacing:-.1em;color:#ffffff05;pointer-events:none}.download-content{position:relative;z-index:1;max-width:550px}.download-content h2{font-size:clamp(30px,3.6vw,44px);margin:10px 0 13px;letter-spacing:-.045em}.download-content p{font-size:13px;line-height:1.75;color:#a9a9af;margin:0}.download-action{position:relative;z-index:1;min-width:200px}.download-action .button{width:100%}.download-action .hint{font-size:10px;color:#898991;text-align:center;margin-top:12px}
+    .faq{display:grid;grid-template-columns:1fr 1.3fr;gap:70px}.faq h2{font-size:35px;letter-spacing:-.04em;margin:10px 0}.faq p{font-size:13px;color:#93939a;line-height:1.7}.questions details{border-bottom:1px solid #35353a;padding:19px 0}.questions summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px;gap:15px}.questions summary::after{content:"+";font-size:22px;font-weight:350;color:#b8b8be}.questions details[open] summary::after{content:"−"}.questions summary::-webkit-details-marker{display:none}.questions details p{font-size:12px;line-height:1.8;color:#a6a6ad;max-width:570px}
+    .footer{border-top:1px solid #35353a;margin-top:83px;padding:26px 0 35px;display:flex;justify-content:space-between;align-items:center;gap:18px;color:#89898f;font-size:11px}.footer .links{display:flex;gap:24px}.footer a{transition:.2s}
+    @media(max-width:1000px){.hero-inner{grid-template-columns:1fr;gap:45px}.hero{padding:72px 0}.copy{max-width:680px}.app-preview{max-width:650px;margin:auto;transform:none}.preview-wrap{width:100%}.features{grid-template-columns:repeat(2,1fr)}.faq{gap:35px}}
+    @media(max-width:630px){.container{width:min(100% - 30px,1170px)}.nav{height:68px}.navlinks{display:none}.brand{font-size:15px}.hero{padding:63px 0 54px}h1{font-size:48px}.lead{font-size:15px;line-height:1.7}.actions{flex-direction:column;align-items:stretch}.button{width:100%}.app-body{min-height:310px;grid-template-columns:43px 1fr}.app-side{padding:14px 4px}.sideitem{width:33px}.app-main{padding:15px}.icao{font-size:19px}.route-graphic{min-width:40px}.app-h{font-size:20px}.preview-bottom{grid-template-columns:repeat(3,minmax(0,1fr))}.mini{padding:8px}.mini strong{font-size:10px}.section{padding:62px 0}.features{grid-template-columns:1fr}.feature{min-height:unset;padding:22px}.feature h3{margin-top:17px}.download-section{padding:10px 0 50px}.download-panel{padding:29px;display:block}.download-action{margin-top:26px}.faq{grid-template-columns:1fr;gap:8px}.footer{margin-top:56px;flex-direction:column;align-items:flex-start}.footer .links{gap:17px;flex-wrap:wrap}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.feature,.button{transition:none}}
+  </style>
+</head>
+<body>
+  <div class="top-line"></div>
+  <header class="container nav">
+    <a class="brand" href="#" aria-label="Flight Atlas — на главную"><span class="mark" aria-hidden="true">FA</span> FLIGHT ATLAS</a>
+    <nav class="navlinks" aria-label="Основное меню"><a href="#features">Возможности</a><a href="#download">Скачать</a><a href="#faq">Вопросы</a><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases" target="_blank" rel="noopener noreferrer">Релизы ↗</a></nav>
+    <a class="nav-cta" href="#download">Загрузить <span aria-hidden="true">↗</span></a>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="copy">
+          <div class="eyebrow"><span class="dot"></span> СОЗДАНО ДЛЯ ВИРТУАЛЬНЫХ ПИЛОТОВ</div>
+          <h1>Твоя авиация.<br><span>В одном месте.</span></h1>
+          <p class="lead">Маршруты авиакомпаний, авиационные чарты, VATSIM, моды и инструменты для полётов. Всё, что нужно виртуальному пилоту — в Flight Atlas.</p>
+          <div class="actions">
+            <a class="button white download-link" href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 17v3h14v-3"/></svg> Скачать для Windows</a>
+            <a class="button ghost" href="#features">Узнать больше <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="meta"><b id="latest-version">Последняя версия</b><span>•</span><span>Windows 10/11</span><span>•</span><span>Бесплатно</span></div>
+        </div>
+        <div class="preview-wrap">
+          <div class="glow"></div>
+          <div class="app-preview" role="img" aria-label="Иллюстративный макет интерфейса Flight Atlas с примером маршрута">
+            <div class="window-head"><div class="window-title"><span class="mark" style="width:19px;height:19px;border-radius:5px;font-size:8px">FA</span> FLIGHT ATLAS</div><div class="lights"><i></i><i></i><i></i></div></div>
+            <div class="app-body">
+              <aside class="app-side" aria-hidden="true"><span class="sideitem active">⌂</span><span class="sideitem">▤</span><span class="sideitem">✧</span><span class="sideitem">▦</span><span class="sideitem">♧</span><span class="sideitem sideend">◉</span></aside>
+              <div class="app-main">
+                <div class="app-kicker">МАРШРУТНЫЙ КАТАЛОГ</div>
+                <div class="app-h">Найди свой рейс</div>
+                <div class="search-line"><span>Поиск рейса, аэропорта, авиакомпании...</span><span>⌕</span></div>
+                <div class="route-card"><div class="route-head"><span>ПРИМЕР МАРШРУТА · AEROFLOT</span><span class="tag">A320</span></div><div class="airports"><div class="airport"><div class="icao">UUEE</div><div class="city">Шереметьево</div></div><div class="route-graphic"><div class="line"></div><span class="plane">✈</span><div class="line"></div></div><div class="airport" style="text-align:right"><div class="icao">ULMM</div><div class="city">Мурманск</div></div></div></div>
+                <div class="preview-bottom"><div class="mini"><small>Маршруты</small><strong>Реальные рейсы</strong></div><div class="mini"><small>Планирование</small><strong>SimBrief</strong></div><div class="mini"><small>Онлайн-сеть</small><strong>VATSIM</strong></div></div>
+                <div class="preview-caption">Визуальный пример · не живые данные</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="divider container"></div>
+    <section id="features" class="section container">
+      <div class="section-heading"><div class="eyebrow">ВОЗМОЖНОСТИ</div><h2>Меньше вкладок.<br>Больше полётов.</h2><p>Flight Atlas объединяет инструменты для планирования и виртуальных полётов в одном приложении.</p></div>
+      <div class="features">
+        <article class="feature"><div class="feature-icon" aria-hidden="true">✈</div><h3>Каталог рейсов</h3><p>Выбирай авиакомпанию, аэропорты и рейсы. Находи идеи для следующего полёта.</p></article>
+        <article class="feature"><div class="feature-icon" aria-hidden="true">▤</div><h3>Авиационные чарты</h3><p>Работай с доступными схемами аэродромов и процедурами вылета и прибытия.</p></article>
+        <article class="feature"><div class="feature-icon" aria-hidden="true">◎</div><h3>VATSIM</h3><p>Быстрый доступ к радару сети и событиям виртуальной авиации.</p></article>
+        <article class="feature"><div class="feature-icon" aria-hidden="true">▦</div><h3>Каталог модов</h3><p>Находи самолёты, сценарии и дополнения для авиасимуляторов.</p></article>
+        <article class="feature"><div class="feature-icon" aria-hidden="true">☆</div><h3>Профиль и рейтинг</h3><p>Личный кабинет, достижения пилотов и история активности.</p></article>
+        <article class="feature"><div class="feature-icon" aria-hidden="true">⌁</div><h3>Инструменты пилота</h3><p>Планирование через SimBrief, погода и развивающийся раздел performance.</p></article>
+      </div>
+    </section>
+    <section id="download" class="download-section container">
+      <div class="download-panel">
+        <div class="download-content"><div class="eyebrow"><span class="dot"></span> НАЧНИ ЛЕТАТЬ</div><h2>Flight Atlas для Windows</h2><p>Скачай последнюю опубликованную версию. Кнопка загрузки автоматически ведёт на актуальный Windows-установщик из официального репозитория релизов Flight Atlas.</p></div>
+        <div class="download-action"><a class="button white download-link" href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" rel="noopener noreferrer">↓ &nbsp; Скачать приложение</a><div class="hint" id="release-note">Последний публичный релиз на GitHub</div></div>
+      </div>
+    </section>
+    <section id="faq" class="section container" style="padding-top:0">
+      <div class="faq"><div><div class="eyebrow">ВОПРОСЫ И ОТВЕТЫ</div><h2>Нужно знать</h2><p>Коротко о платформе, обновлениях и бесплатной загрузке.</p></div><div class="questions">
+        <details><summary>Flight Atlas бесплатный?</summary><p>Да, текущая сборка приложения распространяется бесплатно через публичный репозиторий релизов.</p></details>
+        <details><summary>Где скачать последнюю версию?</summary><p>Нажми «Скачать для Windows» — сайт найдёт актуальный установщик в GitHub Releases. Если GitHub API временно недоступен, откроется страница последнего релиза.</p></details>
+        <details><summary>Можно открыть Flight Atlas в браузере?</summary><p>Пока эта страница — сайт проекта, а не полноценная браузерная версия Electron-приложения. Для работы с самим атласом установи версию для Windows.</p></details>
+        <details><summary>Как обновляется приложение?</summary><p>Новые версии публикуются в GitHub Releases. В десктопном приложении предусмотрено обновление через кнопку Update.</p></details>
+      </div></div>
+    </section>
+  </main>
+  <footer class="container footer"><a class="brand" href="#" style="font-size:12px"><span class="mark" style="width:27px;height:27px;border-radius:8px;font-size:11px">FA</span> FLIGHT ATLAS</a><span>© <span id="year"></span> Flight Atlas. Для виртуальных пилотов.</span><div class="links"><a href="#features">Возможности</a><a href="#download">Скачать</a><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases" target="_blank" rel="noopener noreferrer">GitHub Releases ↗</a></div></footer>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    (async()=>{
+      const fallback='https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest';
+      try {
+        const response=await fetch('https://api.github.com/repos/NUROFENE/Flight-Atlas-Releases/releases/latest',{headers:{'Accept':'application/vnd.github+json'}});
+        if(!response.ok) throw new Error('GitHub API: '+response.status);
+        const release=await response.json();
+        const setup=(release.assets||[]).find(a=>/\.exe$/i.test(a.name)&&/setup|installer/i.test(a.name)) || (release.assets||[]).find(a=>/\.exe$/i.test(a.name));
+        const url=setup?.browser_download_url || release.html_url || fallback;
+        document.querySelectorAll('.download-link').forEach(a=>a.href=url);
+        const version=release.tag_name||release.name;
+        if(version) {document.getElementById('latest-version').textContent='Версия '+version.replace(/^v/i,'');document.getElementById('release-note').textContent='Последняя версия: '+version.replace(/^v/i,'');}
+      } catch(err) {
+        document.querySelectorAll('.download-link').forEach(a=>a.href=fallback);
+      }
+    })();
+  </script>
+</body>
+</html>
