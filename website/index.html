@@ -37,15 +37,28 @@
     @media(max-width:630px){.container{width:min(100% - 30px,1170px)}.nav{height:68px}.navlinks{display:none}.brand{font-size:15px}.hero{padding:63px 0 54px}h1{font-size:48px}.lead{font-size:15px;line-height:1.7}.actions{flex-direction:column;align-items:stretch}.button{width:100%}.app-body{min-height:310px;grid-template-columns:43px 1fr}.app-side{padding:14px 4px}.sideitem{width:33px}.app-main{padding:15px}.icao{font-size:19px}.route-graphic{min-width:40px}.app-h{font-size:20px}.preview-bottom{grid-template-columns:repeat(3,minmax(0,1fr))}.mini{padding:8px}.mini strong{font-size:10px}.section{padding:62px 0}.features{grid-template-columns:1fr}.feature{min-height:unset;padding:22px}.feature h3{margin-top:17px}.download-section{padding:10px 0 50px}.download-panel{padding:29px;display:block}.download-action{margin-top:26px}.faq{grid-template-columns:1fr;gap:8px}.footer{margin-top:56px;flex-direction:column;align-items:flex-start}.footer .links{gap:17px;flex-wrap:wrap}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.feature,.button{transition:none}}
   </style>
-</head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/site-v2.css"></head>
 <body>
   <div class="top-line"></div>
   <header class="container nav">
-    <a class="brand" href="#" aria-label="Flight Atlas — на главную"><span class="mark" aria-hidden="true">FA</span> FLIGHT ATLAS</a>
-    <nav class="navlinks" aria-label="Основное меню"><a href="#features">Возможности</a><a href="#download">Скачать</a><a href="#faq">Вопросы</a><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases" target="_blank" rel="noopener noreferrer">Релизы ↗</a></nav>
-    <a class="nav-cta" href="#download">Загрузить <span aria-hidden="true">↗</span></a>
+    <a class="brand" href="#/home" aria-label="Flight Atlas — на главную"><span class="mark" aria-hidden="true">FA</span> FLIGHT ATLAS</a>
+    <nav class="navlinks" aria-label="Разделы Flight Atlas">
+      <a href="#/home" data-page-link="home" data-i18n="home">ГЛАВНАЯ</a>
+      <a href="#/subscription" data-page-link="subscription" data-i18n="sub" class="subscription-link">Subscription</a>
+      <a href="#/routes" data-page-link="routes" data-i18n="routes">РЕЙСЫ</a>
+      <a href="#/mods" data-page-link="mods" data-i18n="mods">МОДЫ</a>
+      <a href="#/account" data-page-link="account" data-i18n="account">АККАУНТ</a>
+      <a href="#/charts" data-page-link="charts" data-i18n="charts">ЧАРТЫ</a>
+      <a href="#/map" data-page-link="map" data-i18n="map">КАРТА</a>
+      <a href="https://discord.com/app" target="_blank" rel="noopener noreferrer" data-i18n="support" title="Открыть Discord">ПОДДЕРЖКА ↗</a>
+    </nav>
+    <div class="nav-right">
+      <a class="nav-cta download-link" href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" rel="noopener noreferrer"><span data-i18n="download">Скачать</span> ↓</a>
+      <div class="lang-picker" role="group" aria-label="Language"><button type="button" data-lang="ru" aria-label="Русский">RU</button><button type="button" data-lang="en" aria-label="English">EN</button></div>
+      <button class="mobile-toggle" type="button" aria-label="Открыть навигацию" aria-expanded="false">☰</button>
+    </div>
   </header>
-  <main>
+  <main id="siteMain"><div id="page-home" class="page active" data-page="home">
     <section class="hero">
       <div class="container hero-inner">
         <div class="copy">
@@ -56,7 +69,7 @@
             <a class="button white download-link" href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 17v3h14v-3"/></svg> Скачать для Windows</a>
             <a class="button ghost" href="#features">Узнать больше <span aria-hidden="true">↗</span></a>
           </div>
-          <div class="meta"><b id="latest-version">Последняя версия</b><span>•</span><span>Windows 10/11</span><span>•</span><span>Бесплатно</span></div>
+          <div class="meta"><b id="latest-version">Последняя версия</b><span>•</span><span>Windows 10/11</span><span>•</span><span id="homeMetaFree">Бесплатно</span></div>
         </div>
         <div class="preview-wrap">
           <div class="glow"></div>
@@ -103,6 +116,54 @@
         <details><summary>Как обновляется приложение?</summary><p>Новые версии публикуются в GitHub Releases. В десктопном приложении предусмотрено обновление через кнопку Update.</p></details>
       </div></div>
     </section>
+  </div>
+    <section class="page web-page container" id="page-mods" data-page="mods">
+      <div class="web-head"><div><div class="web-kicker" data-i18n="modsKicker">FLIGHT ATLAS / БИБЛИОТЕКА</div><h1 class="web-title" data-i18n="modsTitle">Моды и дополнения</h1><p class="web-desc" data-i18n="modsDesc">Самолёты, аэропорты и инструменты для авиасимуляторов.</p></div><div class="web-counter"><span id="modsShownTitle">Найдено: </span><strong id="modsCount">0</strong></div></div>
+      <div class="mods-controls">
+        <label class="mods-search"><input type="search" id="modsSearch" placeholder="Поиск модов, самолётов, аэропортов..." autocomplete="off" aria-label="Поиск дополнений"></label>
+        <select id="modsGame" class="mods-select" aria-label="Игра">
+          <option value="all">Все игры</option><option value="msfs24">MSFS 2024</option><option value="msfs20">MSFS 2020</option><option value="msfsboth">MSFS 2020 / 2024</option><option value="xp12">X-Plane 12</option><option value="xp11">X-Plane 11</option>
+        </select>
+        <select id="modsSort" class="mods-select" aria-label="Сортировка"><option value="default">По каталогу</option><option value="name">По названию</option><option value="reverse">В обратном порядке</option></select>
+      </div>
+      <div class="mod-cats" role="group" aria-label="Категории модов">
+        <button class="mod-cat selected" data-cat="all" type="button">Все</button>
+        <button class="mod-cat" data-cat="aircraft" type="button">✈ Самолёты</button>
+        <button class="mod-cat" data-cat="scenery" type="button">◈ Сценарии</button>
+        <button class="mod-cat" data-cat="utility" type="button">⚙ Утилиты</button>
+      </div>
+      <div id="modsGrid" class="mod-grid"></div><div id="modsEmpty" class="mod-empty" hidden>Нет совпадений</div>
+    </section>
+    <section class="page utility-page container" id="page-subscription" data-page="subscription">
+      <div class="web-kicker" data-i18n="subKicker">FLIGHT ATLAS / ПОДПИСКА</div><h1 class="web-title" data-i18n="subTitle">Subscription</h1>
+      <div class="info-panel"><div class="symbol" aria-hidden="true">♛</div><div><h2>Flight Atlas Subscription</h2><p data-i18n="subText"></p><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" class="button white download-link" data-i18n="desktop">Скачать Windows-приложение</a></div></div>
+    </section>
+    <section class="page utility-page container" id="page-routes" data-page="routes">
+      <div class="web-kicker" data-i18n="routesKicker">FLIGHT ATLAS / РЕЙСЫ</div><h1 class="web-title" data-i18n="routesTitle">Маршрутный каталог</h1><p class="web-desc" data-i18n="routesText"></p>
+      <div class="route-list">
+        <article class="route-example"><div class="stations">UUEE <span>→</span> ULMM</div><small>Aeroflot · Москва — Мурманск</small></article>
+        <article class="route-example"><div class="stations">ULLI <span>→</span> UMKK</div><small>Санкт-Петербург — Калининград</small></article>
+        <article class="route-example"><div class="stations">UUEE <span>→</span> UWGG</div><small>Aeroflot · Москва — Нижний Новгород</small></article>
+      </div>
+      <div class="info-panel"><div class="symbol">✈</div><div><h2>Полный каталог — в приложении</h2><p data-i18n="routesText"></p><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" class="button white download-link" data-i18n="desktop">Скачать Windows-приложение</a></div></div>
+    </section>
+    <section class="page utility-page container" id="page-account" data-page="account">
+      <div class="web-kicker" data-i18n="accountKicker">FLIGHT ATLAS / ПИЛОТ</div><h1 class="web-title" data-i18n="accountTitle">Аккаунт</h1>
+      <div class="info-panel"><div class="symbol">◉</div><div><h2>Flight Atlas Pilot</h2><p data-i18n="accountText"></p><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" class="button white download-link" data-i18n="desktop">Скачать Windows-приложение</a></div></div>
+    </section>
+    <section class="page utility-page container" id="page-charts" data-page="charts">
+      <div class="web-kicker" data-i18n="chartsKicker">FLIGHT ATLAS / CHARTS</div><h1 class="web-title" data-i18n="chartsTitle">Авиационные чарты</h1>
+      <div class="info-panel"><div class="symbol">▤</div><div><h2>Charts</h2><p data-i18n="chartsText"></p><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" class="button white download-link" data-i18n="desktop">Скачать Windows-приложение</a></div></div>
+    </section>
+    <section class="page utility-page container" id="page-map" data-page="map">
+      <div class="web-kicker" data-i18n="mapKicker">FLIGHT ATLAS / WORLD MAP</div><h1 class="web-title" data-i18n="mapTitle">Карта полётов</h1>
+      <div class="info-panel"><div class="symbol">◎</div><div><h2>World Map</h2><p data-i18n="mapText"></p><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases/latest" class="button white download-link" data-i18n="desktop">Скачать Windows-приложение</a></div></div>
+    </section>
+    <dialog id="modDialog" class="mod-modal" aria-labelledby="modName">
+      <button class="modal-corner" onclick="document.querySelector('#modDialog').close()" aria-label="Закрыть">✕</button>
+      <img class="modal-photo" id="modImage" src="" alt="">
+      <div class="modal-content"><div class="web-kicker" id="modKind"></div><h2 id="modName"></h2><p id="modDetail"></p><div class="modal-buttons"><a id="modOpenSource" class="modal-source" target="_blank" rel="noopener noreferrer" href="#">Официальный сайт ↗</a><button type="button" id="modalClose" class="modal-close">Закрыть</button></div></div>
+    </dialog>
   </main>
   <footer class="container footer"><a class="brand" href="#" style="font-size:12px"><span class="mark" style="width:27px;height:27px;border-radius:8px;font-size:11px">FA</span> FLIGHT ATLAS</a><span>© <span id="year"></span> Flight Atlas. Для виртуальных пилотов.</span><div class="links"><a href="#features">Возможности</a><a href="#download">Скачать</a><a href="https://github.com/NUROFENE/Flight-Atlas-Releases/releases" target="_blank" rel="noopener noreferrer">GitHub Releases ↗</a></div></footer>
   <script>
@@ -123,5 +184,5 @@
       }
     })();
   </script>
-</body>
+<script src="/site-v2.js" defer></script></body>
 </html>
