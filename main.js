@@ -6,6 +6,9 @@ const fsSync=require('node:fs');
 const {spawn}=require('node:child_process');
 const {ipcMain}=require('electron');
 const {autoUpdater}=require('electron-updater');
+const DEV_MODE=process.env.FLIGHT_ATLAS_DEV==='1';
+if(DEV_MODE){app.setName('Flight Atlas Dev');app.setPath('userData',path.join(app.getPath('appData'),'Flight Atlas Dev'));}
+
 const {FlightAtlasSimConnect}=require('./simconnect-bridge');
 const simBridge=new FlightAtlasSimConnect();
 const ROOT=path.join(__dirname,'app');
@@ -140,6 +143,12 @@ function setupUpdater(){
   const response=await getRemote('https://www.simbrief.com/api/xml.fetcher.php?userid='+id,'application/xml',40);
   return response.text();
  });
+ if(DEV_MODE){
+  ipcMain.handle('app:version',()=>app.getVersion()+'-dev');
+  ipcMain.handle('updater:check',async()=>({ok:false,error:'Обновления отключены в Flight Atlas Dev.'}));
+  ipcMain.handle('updater:install',async()=>({ok:false,error:'Обновления отключены в Flight Atlas Dev.'}));
+  return;
+ }
  autoUpdater.autoDownload=true;
  autoUpdater.autoInstallOnAppQuit=true;
  autoUpdater.setFeedURL({provider:'github',owner:'NUROFENE',repo:'Flight-Atlas-App'});
@@ -167,7 +176,7 @@ function setupUpdater(){
  });
 }
 function buildWindow(){Menu.setApplicationMenu(null);win=new BrowserWindow({frame:false,width:1500,height:940,minWidth:1000,minHeight:650,backgroundColor:'#0b1322',title:'',show:false,autoHideMenuBar:true,icon:path.join(ROOT,'FlightAtlas.ico'),webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
- win.once('ready-to-show',()=>{win.setTitle('');win.show();if(updaterConfigured())setTimeout(()=>autoUpdater.checkForUpdates().catch(e=>emit('error',{message:e.message})),1500)});win.loadURL('atlas://flightatlas/');
+ win.once('ready-to-show',()=>{win.setTitle(DEV_MODE?'Flight Atlas Dev':'');win.show();if(updaterConfigured())setTimeout(()=>autoUpdater.checkForUpdates().catch(e=>emit('error',{message:e.message})),1500)});win.loadURL('atlas://flightatlas/');
  win.webContents.setWindowOpenHandler(({url})=>{if(/^https:\/\//i.test(url))shell.openExternal(url);return {action:'deny'}});
  win.webContents.on('will-navigate',(ev,url)=>{if(!url.startsWith('atlas://flightatlas/')){ev.preventDefault();if(/^https:\/\//i.test(url))shell.openExternal(url)}});
  win.webContents.on('render-process-gone',()=>dialog.showErrorBox('Flight Atlas','Процесс интерфейса остановился. Перезапустите приложение.'));
