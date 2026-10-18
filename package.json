@@ -9,7 +9,8 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --win nsis --x64",
-    "dist": "electron-builder --win nsis --x64 --publish always"
+    "dist": "electron-builder --win nsis --x64 --publish always",
+    "dev": "node dev-launch.js"
   },
   "dependencies": {
     "electron-updater": "^6.6.2",
