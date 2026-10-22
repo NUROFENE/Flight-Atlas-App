@@ -28,9 +28,9 @@ td{padding:15px 17px;border-top:1px solid #303033}tbody tr:hover{background:#242
 .note{margin-top:20px;color:#94949b;font-size:12px;line-height:1.7}
 @media(max-width:850px){.layout{grid-template-columns:1fr}.carriers{display:flex;overflow:auto;padding-bottom:6px}.carrier{min-width:max-content}.filters{grid-template-columns:1fr 1fr}.filters input:first-child{grid-column:1/-1}}
 @media(max-width:500px){header{padding:0 18px}main{padding-top:33px}.metrics{gap:8px}.metric{min-width:0;flex:1;padding:12px}.filters{grid-template-columns:1fr 1fr}.filters .reset{min-height:43px}.result-head{align-items:flex-start;flex-direction:column}th,td{padding:12px}}
-</style></head><body>
+body:has(.embedded-marker) header{display:none}body:has(.embedded-marker) main{width:min(100% - 24px,1180px);padding:20px 0 40px}body:has(.embedded-marker) main>.kicker,body:has(.embedded-marker) main>h1,body:has(.embedded-marker) main>.intro{display:none}</style></head><body>
 <header><a class="brand" href="./">FA &nbsp; FLIGHT ATLAS</a><a class="back" href="./">← На главную</a></header>
-<main><div class="kicker">FLIGHT ATLAS · КАТАЛОГ</div><h1>Рейсы авиакомпаний</h1>
+<span class="embedded-marker" hidden></span><main><div class="kicker">FLIGHT ATLAS · КАТАЛОГ</div><h1>Рейсы авиакомпаний</h1>
 <p class="intro">Все собранные нами рейсы из каталога Flight Atlas. Выбирай авиакомпанию, ищи по номеру, аэропорту вылета или прилёта и типу самолёта.</p>
 <div class="metrics"><div class="metric"><strong id="total">—</strong><span>Рейсов</span></div><div class="metric"><strong id="airline-count">—</strong><span>Авиакомпаний с рейсами</span></div><div class="metric"><strong id="route-count">—</strong><span>Направлений</span></div></div>
 <div class="layout"><aside><div class="aside-title">АВИАКОМПАНИИ</div><div class="carriers" id="carriers"></div></aside><div class="content">
